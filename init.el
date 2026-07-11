@@ -603,7 +603,7 @@
 (add-hook 'emacs-lisp-mode-hook
     (lambda ()
         (setq-local imenu-generic-expression '(
-            ("topics" "^;;; @topic[[:space:]]+\\(.+\\)$"   1)
+            ("topics" "^;; @topic[[:space:]]+\\(.+\\)$"    1)
             ("functions" "^(defun[[:space:]]+\\([^ ]+\\)"  1)
             ("variables" "^(defvar[[:space:]]+\\([^ ]+\\)" 1)
             ("custom" "^(defcustom[[:space:]]+\\([^ ]+\\)" 1)
