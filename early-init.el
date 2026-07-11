@@ -15,5 +15,5 @@
         )
 
 (add-to-list 'default-frame-alist
-             '(font . "MartianMono Nerd Font Mono-14"))  ;; first frame opens with the correct font
+             '(font . "Iosevka Nerd Font Mono-14"))  ;; first frame opens with the correct font
 
