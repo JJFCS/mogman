@@ -5,15 +5,14 @@
 ;; XX - PACKAGE MANAGEMENT
 ;; XXX - GENERAL SETTINGS
 ;; XXXX - FUNCTIONS - PART 1
-;; XXXXX - IMPORTANT TO LOAD FIRST
-;; XXXXXX - THEMES / FONTS / APPEARANCES
-;; XXXXXXX - COMPLETIONS / MINIBUFFER
-;; XXXXXXXX - PROGRAMMING
-;; XXXXXXXXX - CONVENIENCE
-;; XXXXXXXXXX - FUNCTIONS - PART 2
-;; XXXXXXXXXXX - HOOKS
-;; XXXXXXXXXXXX - KEYBINDINGS
-;; XXXXXXXXXXXXX - TESTING PLAYGROUND
+;; XXXXX - THEMES / FONTS / APPEARANCES
+;; XXXXXX - COMPLETIONS / MINIBUFFER
+;; XXXXXXX - PROGRAMMING
+;; XXXXXXXX - CONVENIENCE
+;; XXXXXXXXX - FUNCTIONS - PART 2
+;; XXXXXXXXXX - HOOKS
+;; XXXXXXXXXXX - KEYBINDINGS
+;; XXXXXXXXXXXX - TESTING PLAYGROUND
 
 ;; ================================================================================
 ;; @topic CUSTOM FILE
@@ -138,20 +137,6 @@
 
 
 ;; ================================================================================
-;; @topic IMPORTANT TO LOAD FIRST
-;; ================================================================================
-;; - packages that we want to load first so we have them asap if something breaks
-
-;;;; OUTLI
-;; -------------------------------------------------- ;;
-(use-package outli
-    :ensure t
-    :hook (emacs-lisp-mode . outli-mode)
-)
-;; -------------------------------------------------- ;;
-
-
-;; ================================================================================
 ;; @topic THEMES / FONTS / APPEARANCES
 ;; ================================================================================
 (use-package ef-themes       :ensure t :defer t) (use-package modus-themes :ensure t :defer t)
@@ -243,10 +228,17 @@
 ;; -------------------------------------------------- ;;
 ;; - NOTE: C-o does the toggling in helm-mode
 ;; - NOTE: currently using which-key.. to use helm-descbinds, uncomment use-package block below
+
+;; - NOTE: the reason we do not turn on "helm-mode" is because we only want to use helm for certain things
+;; - NOTE: this prevents it from interfering with other completion systems
+
 ;; - TODO: INCLUDE THE FOLLOWING MODULES === HELM-PROJECTILE, HELM-SWOOP, helm-M-x-show-short-doc
 (use-package helm-describe-modes :ensure t)
 (use-package helm
     :ensure t
+    :config
+    (require 'helm-buffers)
+    (require 'helm-imenu)
     :bind (:map helm-map
         ("TAB" . helm-execute-persistent-action)
         ("C-j" . helm-select-action)
@@ -272,9 +264,9 @@
 ;; -------------------------------------------------- ;;
 (use-package vertico :ensure t
     :config
+    (require 'vertico-multiform)
     (vertico-mode)
     (vertico-multiform-mode)
-    (require 'vertico-multiform)
     (setq vertico-multiform-categories '((file (vertico-sort-function . onncera-vertico-find-file))))
     (setq vertico-multiform-commands '(
         (consult-find buffer)
@@ -602,6 +594,18 @@
 (add-hook 'emacs-startup-hook #'toggle-frame-fullscreen t)
 (add-hook 'prog-mode-hook #'onncera-highlight-todo)
 (add-hook 'prog-mode-hook #'onncera-set-up-whitespace-handling)
+
+(add-hook 'emacs-lisp-mode-hook
+    (lambda ()
+        (setq-local imenu-generic-expression '(
+            ("topics" "^;;; @topic[[:space:]]+\\(.+\\)$"   1)
+            ("functions" "^(defun[[:space:]]+\\([^ ]+\\)"  1)
+            ("variables" "^(defvar[[:space:]]+\\([^ ]+\\)" 1)
+            ("custom" "^(defcustom[[:space:]]+\\([^ ]+\\)" 1)
+        )
+        )
+    )
+)
 
 
 ;; ================================================================================
