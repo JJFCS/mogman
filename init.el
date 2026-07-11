@@ -89,7 +89,7 @@
 
 
 ;; ================================================================================
-;; FUNCTIONS - @topic PART 1
+;; @topic FUNCTIONS - PART 1
 ;; ================================================================================
 ;; NOTE - part one because some functions need to be defined earlier than others
 
@@ -138,7 +138,7 @@
 
 
 ;; ================================================================================
-;; IMPORTANT TO @topic LOAD FIRST
+;; @topic IMPORTANT TO LOAD FIRST
 ;; ================================================================================
 ;; - packages that we want to load first so we have them asap if something breaks
 
@@ -152,7 +152,7 @@
 
 
 ;; ================================================================================
-;; THEMES / @topic FONTS / APPEARANCES
+;; @topic THEMES / FONTS / APPEARANCES
 ;; ================================================================================
 (use-package ef-themes       :ensure t :defer t) (use-package modus-themes :ensure t :defer t)
 (use-package standard-themes :ensure t :defer t) (use-package doric-themes :ensure t :defer t)
