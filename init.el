@@ -746,6 +746,7 @@
 ;; ================================================================================
 
 ;; NOTE - packages to explore more:
+;; > crux   (https://github.com/bbatsov/crux)
 ;; > nucleo (https://github.com/kn66/nucleo-completion.el)
 ;; > yuta   (https://github.com/zenitsu7772000/yuta.el)
 
