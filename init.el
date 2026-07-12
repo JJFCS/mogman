@@ -14,9 +14,9 @@
 ;; XXXXXXXXXXX - KEYBINDINGS
 ;; XXXXXXXXXXXX - TESTING PLAYGROUND
 
-;; TODO - sub topics for imenu
-;; e.g. @ subtopic 1
-;; e.g. @ subtopic 2
+;; TODO - sub topics for imenu (e.g. use for areas like ";;;; HELM")
+;; e.g. @subtopic-1
+;; e.g. @subtopic-2
 ;; e.g. etc
 
 ;; ================================================================================
@@ -153,6 +153,27 @@
 )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; https://www.youtube.com/watch?v=M7-dJb2GTN4 (sacha chua & omar antolin camarena)
+;; block-undo (undo keyboard macros in a single step)
+(defun block-undo (fn &rest args)
+    "Apply FN to ARGS in such a way that it can be undone in a single step"
+    (undo-boundary)
+    (with-undo-amalgamate
+        (apply fn args)
+    )
+)
+
+(dolist (fn '(
+                kmacro-call-macro
+                kmacro-exec-ring-item
+                apply-macro-to-region-lines
+            )
+        )
+    (advice-add fn :around #'block-undo)
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 ;; ================================================================================
 ;; @topic THEMES / FONTS / APPEARANCES
@@ -180,6 +201,8 @@
 
 (use-package gruber-darker-theme     :ensure t :defer t)
 (use-package jetbrains-darcula-theme :ensure t :defer t)
+(use-package naysayer-theme          :ensure t :defer t)
+(use-package weyland-yutani-theme    :ensure t :defer t)
 
 ;; NOTE - these packages tend to break more often (beware)
 (use-package pixel-themes  :vc (:url "https://github.com/lucasobx/pixel-themes"      :rev :newest))
@@ -707,12 +730,6 @@
 ;; NOTE - packages to explore more:
 ;; > nucleo (https://github.com/kn66/nucleo-completion.el)
 ;; > yuta   (https://github.com/zenitsu7772000/yuta.el)
-
-;;;; RANDOM
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package weyland-yutani-theme :ensure t :defer t)
-(use-package naysayer-theme       :ensure t :defer t)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;; COLORFUL MODE
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
