@@ -43,7 +43,6 @@
 ;; @topic GENERAL SETTINGS
 ;; ================================================================================
 (add-to-list 'exec-path "/opt/homebrew/bin")
-(setenv "PATH" (concat "/opt/homebrew/bin:" (getenv "PATH")))  ;; @check TODO - recommended by AI (remove?)
 
 ;; NOTE - for variables we use 't' or 'nil'
 ;; NOTE - for functions we use numbers (1 == enabled , 0 == disabled , no number means toggle)
@@ -65,9 +64,9 @@
 (electric-pair-mode 1)
 (fringe-mode 0)
 
-(recentf-mode 1) (savehist-mode 1)  ;; NOTE - to del M-x history go to onemacs-cache & delete the "history" file
 (setq recentf-save-file "~/.emacs.d/onemacs-cache/recentf")  ;; NOTE - hardcoding the path
 (setq savehist-file     "~/.emacs.d/onemacs-cache/history")  ;; NOTE - hardcoding the path
+(recentf-mode 1) (savehist-mode 1)  ;; NOTE - to del M-x history go to onemacs-cache & delete the "history" file
 
 (global-display-line-numbers-mode 1)
 (global-hl-line-mode 1)
@@ -105,6 +104,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
 (defun onncera-highlight-todo ()
     "Highlight important annotation keywords"
     (font-lock-add-keywords nil `((,(concat "\\<" (regexp-opt '("TODO" "FIXME" "BUG" "NOTE")) "\\>")
@@ -118,6 +118,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
 (defun onncera-smart-beginning-of-line ()
     "moves cursor to first non-whitespace char or beg of line. alternates if called repeatedly"
     (interactive)
@@ -131,12 +132,24 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
 (defun onncera-set-up-whitespace-handling ()
     "whitespace mode with trailing line protection"
     (interactive)
     (whitespace-mode)
         (setq-local delete-trailing-lines nil)  ;; stops emacs from deleting empty lines at the bottom of file
         (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(defun onncera-helm-imenu-right ()
+    "run helm-imenu with the Helm window on the right"
+    (interactive)
+    (let ((helm-split-window-default-side 'right))
+    (helm-imenu)
+    )
 )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -244,6 +257,7 @@
     :config
     (require 'helm-buffers)
     (require 'helm-imenu)
+    (setq helm-imenu-delimiter " = ")
     :bind (:map helm-map
         ("TAB" . helm-execute-persistent-action)
         ("C-j" . helm-select-action)
@@ -277,7 +291,6 @@
         (consult-find buffer)
         (consult-grep buffer)
         (consult-line buffer)
-        (imenu buffer)
         )
     )
 )
@@ -321,10 +334,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
 (use-package cape
     :ensure t
     :config
-    (defun onncera/cape-capf-setup ()
+    (defun onncera-cape-capf-setup ()
     (setq-local completion-at-point-functions
     (list
     (cape-capf-super
@@ -335,7 +349,7 @@
     )
     )
     )
-    :hook (eglot-managed-mode . onncera/cape-capf-setup) (prog-mode . onncera/cape-capf-setup)
+    :hook (eglot-managed-mode . onncera-cape-capf-setup) (prog-mode . onncera-cape-capf-setup)
 )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -390,6 +404,7 @@
 
 ;;;; EGLOT
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
 (use-package eglot
     :hook
     (
@@ -513,14 +528,14 @@
     )
     :config
     ;; Function advice to have Emacs re-indent the text in-and-around a text move
-    (defun my/move-text-indent-region-advice (&rest _ignored)
+    (defun onncera-move-text-indent-region-advice (&rest _ignored)
         (let ((deactivate deactivate-mark))
             (if (region-active-p)
                 (indent-region (region-beginning) (region-end))
                 (indent-region (line-beginning-position) (line-end-position)))
             (setq deactivate-mark deactivate)))
-    (advice-add 'move-text-up   :after #'my/move-text-indent-region-advice)
-    (advice-add 'move-text-down :after #'my/move-text-indent-region-advice)
+    (advice-add 'move-text-up   :after #'onncera-move-text-indent-region-advice)
+    (advice-add 'move-text-down :after #'onncera-move-text-indent-region-advice)
 )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -555,6 +570,7 @@
 ;; NOTE - part two because some functions should only be defined at later stages
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
 (defun onncera-vertico-find-file (candidates)
 "Sort CANDIDATES by dotfiles first, then dot-dirs, then files, then dirs (all in alphabetical order)"
     ;; speed up file operations during sorting.. emacs has a ton of background checks. Turn them off
@@ -600,17 +616,35 @@
 (add-hook 'prog-mode-hook #'onncera-highlight-todo)
 (add-hook 'prog-mode-hook #'onncera-set-up-whitespace-handling)
 
-(add-hook 'emacs-lisp-mode-hook
+;;;; imenu
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(add-hook
+    'emacs-lisp-mode-hook
     (lambda ()
-        (setq-local imenu-generic-expression '(
-            ("topics" "^;; @topic[[:space:]]+\\(.+\\)$"    1)
-            ("functions" "^(defun[[:space:]]+\\([^ ]+\\)"  1)
-            ("variables" "^(defvar[[:space:]]+\\([^ ]+\\)" 1)
-            ("custom" "^(defcustom[[:space:]]+\\([^ ]+\\)" 1)
+        ;; Save the original index function installed by emacs-lisp-mode.
+        (setq-local onncera-original-imenu-create-index-function
+                    imenu-create-index-function)
+
+        ;; Replace it with our wrapper.
+        (setq-local imenu-create-index-function
+                    #'onncera-elisp-imenu-create-index)
+    )
+)
+
+(defun onncera-elisp-imenu-create-index ()
+    "extend the builtin emacs lisp imenu index with custom entries"
+    (let ((index (funcall onncera-original-imenu-create-index-function)))
+    (append index
+        (imenu--generic-function '(
+            ("checks" "^[^\n]*\\(?:@check\\|TODO\\)[[:space:]]+\\(.+\\)$" 1)
+            ("topics" "^[^\n]*@topic[[:space:]]+\\(.+\\)$" 1)
         )
         )
     )
+    )
 )
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 ;; ================================================================================
@@ -626,14 +660,15 @@
 
 ;;;; a-map
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defvar onncera/a-map (make-sparse-keymap) "onncera C-c a prefix")
-(global-set-key (kbd "C-c a") onncera/a-map)
-(define-key onncera/a-map (kbd "a") #'avy-goto-char)
-(define-key onncera/a-map (kbd "c") #'completion-at-point)  ;; corfu provides the UI, command is builtin
-(define-key onncera/a-map (kbd "h") #'view-lossage)
-(define-key onncera/a-map (kbd "q") #'onncera-standard-tab)
-(define-key onncera/a-map (kbd "s") #'avy-goto-line)
-(define-key onncera/a-map (kbd "t") #'ansi-term)
+;; @check TODO - done by AI
+(defvar onncera-a-map (make-sparse-keymap) "onncera C-c a prefix")
+(global-set-key (kbd "C-c a") onncera-a-map)
+(define-key onncera-a-map (kbd "a") #'avy-goto-char)
+(define-key onncera-a-map (kbd "c") #'completion-at-point)  ;; corfu provides the UI, command is builtin
+(define-key onncera-a-map (kbd "h") #'view-lossage)
+(define-key onncera-a-map (kbd "q") #'onncera-standard-tab)
+(define-key onncera-a-map (kbd "s") #'avy-goto-line)
+(define-key onncera-a-map (kbd "t") #'ansi-term)
 
 ;; example for non builtin commands
 ;; b - (reserved, example only, uncomment + fill in when needed)
@@ -643,7 +678,8 @@
 
 ;;;; remaps
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(global-set-key [remap move-beginning-of-line] 'onncera-smart-beginning-of-line)
+(global-set-key [remap move-beginning-of-line] '#onncera-smart-beginning-of-line)
+(global-set-key [remap imenu] #'onncera-helm-imenu-right)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
