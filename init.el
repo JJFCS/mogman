@@ -442,6 +442,12 @@
     )
 )
 
+;; reads a .editorconfig file from project root to apply formatting preferences
+;; such as spaces vs tabs, indentation width, whitespace rules, etc.
+;; It does not control emacs indentation behavior or TAB/RET key actions
+(editorconfig-mode 1)
+(electric-indent-mode 0)
+
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 4)
 
