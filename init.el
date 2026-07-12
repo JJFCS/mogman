@@ -157,6 +157,21 @@
 ;; ================================================================================
 ;; @topic THEMES / FONTS / APPEARANCES
 ;; ================================================================================
+
+;; cool themes:
+;; - doom-old-hope
+;; - doom-plain-dark
+;; - doom-spacegrey
+;; - doric-cherry
+;; - gruber-darker
+;; - nerv-theme
+;; - pixel-themes-alia16
+;; - standard-dark
+;; - turbo-c
+;; - tango-dark
+;; - tsdh-dark
+;; - wheatgrass
+
 (use-package ef-themes       :ensure t :defer t) (use-package modus-themes :ensure t :defer t)
 (use-package standard-themes :ensure t :defer t) (use-package doric-themes :ensure t :defer t)
 (use-package doom-themes     :ensure t :defer t)
@@ -204,7 +219,7 @@
 (add-to-list 'custom-theme-load-path
         (expand-file-name "onemacs-theme" user-emacs-directory)
     )
-(onemacs-load-theme 'gruber-darker)  ;; here is where you declare what theme to use
+(onemacs-load-theme 'pixel-themes-alia16)  ;; here is where you declare what theme to use
 
 ;; @check TODO - done by AI
 ;; NOTE - not sure if I still want to include this
