@@ -174,6 +174,24 @@
 )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(defun onncera-set-hl-line-color ()
+    "select a color and set it as the hl-line background"
+    (interactive)
+    (require 'facemenu)
+    (let ((color (completing-read
+            "HL-line color: "
+            (defined-colors)
+        )
+        )
+        )
+    (set-face-attribute 'hl-line nil :background color)
+    (message "hl-line background set to: %s" color)
+    )
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 ;; ================================================================================
 ;; @topic THEMES / FONTS / APPEARANCES
