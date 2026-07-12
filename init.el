@@ -678,7 +678,7 @@
 
 ;;;; remaps
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(global-set-key [remap move-beginning-of-line] '#onncera-smart-beginning-of-line)
+(global-set-key [remap move-beginning-of-line] #'onncera-smart-beginning-of-line)
 (global-set-key [remap imenu] #'onncera-helm-imenu-right)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
