@@ -164,12 +164,14 @@
 ;; - doom-spacegrey
 ;; - doric-cherry
 ;; - gruber-darker
+;; - naysayer
 ;; - nerv-theme
 ;; - pixel-themes-alia16
 ;; - standard-dark
 ;; - turbo-c
 ;; - tango-dark
 ;; - tsdh-dark
+;; - weyland-yutani
 ;; - wheatgrass
 
 (use-package ef-themes       :ensure t :defer t) (use-package modus-themes :ensure t :defer t)
