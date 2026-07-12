@@ -54,8 +54,6 @@
 (setq display-line-numbers-type 'relative)
 
 (setq-default truncate-lines t)
-(setq-default tab-width 4)
-(setq-default indent-tabs-mode nil)
 
 (put 'upcase-region 'disabled nil) (put 'downcase-region 'disabled nil)
 
@@ -443,6 +441,9 @@
         space-mark
     )
 )
+
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 4)
 
 (setq-default c-basic-offset 4)
 (setq-default c-ts-mode-indent-offset 4)
