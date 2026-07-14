@@ -95,13 +95,6 @@
 ;; NOTE - part one because some functions need to be defined earlier than others
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun onncera-standard-tab ()
-    "tabs dwim - literally insert 4 spaces - not indentation"
-    (interactive) (insert "    ")
-)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; @check TODO - done by AI
 (defun onncera-highlight-todo ()
     "Highlight important annotation keywords"
@@ -454,6 +447,7 @@
 (setq-default c-basic-offset 4)
 (setq-default c-ts-mode-indent-offset 4)
 (setq-default python-indent-offset 4)
+(setq python-indent-guess-indent-offset nil)  ;; because we are using editorconfig-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;; PYTHON
@@ -731,7 +725,6 @@
 (define-key onncera-a-map (kbd "a") #'avy-goto-char)
 (define-key onncera-a-map (kbd "c") #'completion-at-point)  ;; corfu provides the UI, command is builtin
 (define-key onncera-a-map (kbd "h") #'view-lossage)
-(define-key onncera-a-map (kbd "q") #'onncera-standard-tab)
 (define-key onncera-a-map (kbd "s") #'avy-goto-line)
 (define-key onncera-a-map (kbd "t") #'ansi-term)
 
