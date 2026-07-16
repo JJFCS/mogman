@@ -52,6 +52,7 @@
 (setq lossage-size 1000)
 (setq locate-command "mdfind")
 (setq display-line-numbers-type 'relative)
+(setq set-mark-command-repeat-pop t)  ;; after C-u C-SPC , keep popping the mark ring with just C-SPC instead of having to repeat the C-u prefix each time
 
 (setq-default truncate-lines t)
 
@@ -66,8 +67,10 @@
 (setq savehist-file     "~/.emacs.d/onemacs-cache/history")  ;; NOTE - hardcoding the path
 (recentf-mode 1) (savehist-mode 1)  ;; NOTE - to del M-x history go to onemacs-cache & delete the "history" file
 
-(global-display-line-numbers-mode 1)
-(global-hl-line-mode 1)
+(global-auto-revert-mode)           ;; auto refresh file buffers when the file on disk changes outside of emacs
+(global-visual-wrap-prefix-mode)    ;; wrapped lines respect the indentation of the original file
+(global-display-line-numbers-mode)
+(global-hl-line-mode)
 
 ;; @check TODO - done by AI
 ;; creating the necessary directories
@@ -206,7 +209,7 @@
 
 (use-package ef-themes       :ensure t :defer t) (use-package modus-themes :ensure t :defer t)
 (use-package standard-themes :ensure t :defer t) (use-package doric-themes :ensure t :defer t)
-(use-package doom-themes     :ensure t :defer t)
+(use-package doom-themes     :ensure t :defer t) (use-package moe-theme    :ensure t :defer t)
 
 (use-package gruber-darker-theme     :ensure t :defer t)
 (use-package jetbrains-darcula-theme :ensure t :defer t)
@@ -214,9 +217,10 @@
 (use-package weyland-yutani-theme    :ensure t :defer t)
 
 ;; NOTE - these packages tend to break more often (beware)
-(use-package pixel-themes  :vc (:url "https://github.com/lucasobx/pixel-themes"      :rev :newest))
-(use-package nerv-theme    :vc (:url "https://github.com/Senka07/nerv_theme.el"      :rev :newest))
-(use-package turbo-c-theme :vc (:url "https://github.com/Senka07/turboc-emacs-theme" :rev :newest))
+(use-package pixel-themes   :vc (:url "https://github.com/lucasobx/pixel-themes"      :rev :newest))
+(use-package nerv-theme     :vc (:url "https://github.com/Senka07/nerv_theme.el"      :rev :newest))
+(use-package spaceink-theme :vc (:url "https://github.com/bcardoso/spaceink-theme"    :rev :newest))
+(use-package turbo-c-theme  :vc (:url "https://github.com/Senka07/turboc-emacs-theme" :rev :newest))
 
 ;; NOTE - breaks my emacs (weird)
 ;; (use-package nvim-dark-theme
@@ -507,6 +511,12 @@
 (use-package avy :ensure t)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;;; CASUAL
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; TODO - check out other 'casual' packages - https://github.com/kickingvegas
+(use-package casual :ensure t)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;;; DISABLE MOUSE (INHIBIT)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package inhibit-mouse
@@ -718,13 +728,18 @@
 ;; example for non builtin commands
 ;; b - (reserved, example only, uncomment + fill in when needed)
 ;; (with-eval-after-load 'magit
-;;   (define-key onncera/a-map (kbd "b") #'magit-status))
+;;   (define-key onncera-a-map (kbd "b") #'magit-status))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;; remaps
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (global-set-key [remap move-beginning-of-line] #'onncera-smart-beginning-of-line)
 (global-set-key [remap imenu] #'onncera-helm-imenu-right)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; navigation
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; TODO
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
