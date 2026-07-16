@@ -4,12 +4,12 @@
 ;; X - CUSTOM FILE
 ;; XX - PACKAGE MANAGEMENT
 ;; XXX - GENERAL SETTINGS
-;; XXXX - FUNCTIONS - PART 1
+;; XXXX - FUNCTIONS / VARIABLES - PART 1
 ;; XXXXX - THEMES / FONTS / APPEARANCES
 ;; XXXXXX - COMPLETIONS / MINIBUFFER
 ;; XXXXXXX - PROGRAMMING
 ;; XXXXXXXX - CONVENIENCE
-;; XXXXXXXXX - FUNCTIONS - PART 2
+;; XXXXXXXXX - FUNCTIONS / VARIABLES - PART 2
 ;; XXXXXXXXXX - HOOKS
 ;; XXXXXXXXXXX - KEYBINDINGS
 ;; XXXXXXXXXXXX - TESTING PLAYGROUND
@@ -93,7 +93,7 @@
 
 
 ;; ================================================================================
-;; @topic FUNCTIONS - PART 1
+;; @topic FUNCTIONS / VARIABLES - PART 1
 ;; ================================================================================
 ;; NOTE - part one because some functions need to be defined earlier than others
 
@@ -183,6 +183,16 @@
     (set-face-attribute 'hl-line nil :background color)
     (message "hl-line background set to: %s" color)
     )
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(defvar onncera-term-shell "/bin/bash" "The default shell path used for custom terminal commands")
+(defun onncera-ansi-term ()
+    "Launch `ansi-term` instantly using `onncera-term-shell` without prompting"
+    (interactive)
+    (ansi-term onncera-term-shell)
 )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -621,7 +631,7 @@
 
 
 ;; ================================================================================
-;; @topic FUNCTIONS - PART 2
+;; @topic FUNCTIONS / VARIABLES - PART 2
 ;; ================================================================================
 ;; NOTE - part two because some functions should only be defined at later stages
 
@@ -723,7 +733,7 @@
 (define-key onncera-a-map (kbd "c") #'completion-at-point)  ;; corfu provides the UI, command is builtin
 (define-key onncera-a-map (kbd "h") #'view-lossage)
 (define-key onncera-a-map (kbd "s") #'avy-goto-line)
-(define-key onncera-a-map (kbd "t") #'ansi-term)
+(define-key onncera-a-map (kbd "t") #'onncera-term-shell)
 
 ;; example for non builtin commands
 ;; b - (reserved, example only, uncomment + fill in when needed)
@@ -737,9 +747,83 @@
 (global-set-key [remap imenu] #'onncera-helm-imenu-right)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;;; reclaiming keys (unset)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; separated into blocks so we can visualise better
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(global-unset-key (kbd "C-0")) (global-unset-key (kbd "M-0")) (global-unset-key (kbd "C-M-0"))
+(global-unset-key (kbd "C-1")) (global-unset-key (kbd "M-1")) (global-unset-key (kbd "C-M-1"))
+(global-unset-key (kbd "C-2")) (global-unset-key (kbd "M-2")) (global-unset-key (kbd "C-M-2"))
+(global-unset-key (kbd "C-3")) (global-unset-key (kbd "M-3")) (global-unset-key (kbd "C-M-3"))
+(global-unset-key (kbd "C-4")) (global-unset-key (kbd "M-4")) (global-unset-key (kbd "C-M-4"))
+(global-unset-key (kbd "C-5")) (global-unset-key (kbd "M-5")) (global-unset-key (kbd "C-M-5"))
+(global-unset-key (kbd "C-6")) (global-unset-key (kbd "M-6")) (global-unset-key (kbd "C-M-6"))
+(global-unset-key (kbd "C-7")) (global-unset-key (kbd "M-7")) (global-unset-key (kbd "C-M-7"))
+(global-unset-key (kbd "C-8")) (global-unset-key (kbd "M-8")) (global-unset-key (kbd "C-M-8"))
+(global-unset-key (kbd "C-9")) (global-unset-key (kbd "M-9")) (global-unset-key (kbd "C-M-9"))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(global-unset-key (kbd "C-<end>"))     ;; this is the 'end'       key on my logitech keyboard
+(global-unset-key (kbd "C-<prior>"))   ;; this is the 'page up'   key on my logitech keyboard
+(global-unset-key (kbd "C-<help>"))    ;; this is the 'insert'    key on my logitech keyboard
+(global-unset-key (kbd "C-<home>"))    ;; this is the 'home'      key on my logitech keyboard
+(global-unset-key (kbd "C-<next>"))    ;; this is the 'page down' key on my logitech keyboard
+(global-unset-key (kbd "C-<delete>"))  ;; this is the 'delete'    key on my logitech keyboard
+
+(global-unset-key (kbd "M-<end>"))     (global-unset-key (kbd "C-M-<end>"))
+(global-unset-key (kbd "M-<prior>"))   (global-unset-key (kbd "C-M-<prior>"))
+(global-unset-key (kbd "M-<help>"))    (global-unset-key (kbd "C-M-<help>"))
+(global-unset-key (kbd "M-<home>"))    (global-unset-key (kbd "C-M-<home>"))
+(global-unset-key (kbd "M-<next>"))    (global-unset-key (kbd "C-M-<next>"))
+(global-unset-key (kbd "M-<delete>"))  (global-unset-key (kbd "C-M-<delete>"))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(global-unset-key (kbd "<f9>" )) (global-unset-key (kbd "C-M-<f9>" ))
+(global-unset-key (kbd "<f10>")) (global-unset-key (kbd "C-M-<f10>"))
+(global-unset-key (kbd "<f11>")) (global-unset-key (kbd "C-M-<f11>"))
+(global-unset-key (kbd "<f12>")) (global-unset-key (kbd "C-M-<f12>"))
+
+(global-unset-key (kbd "C-<f9>" )) (global-unset-key (kbd "M-<f9>" ))
+(global-unset-key (kbd "C-<f10>")) (global-unset-key (kbd "M-<f10>"))
+(global-unset-key (kbd "C-<f11>")) (global-unset-key (kbd "M-<f11>"))
+(global-unset-key (kbd "C-<f12>")) (global-unset-key (kbd "M-<f12>"))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; separated into blocks so we can visualise better
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;;; navigation
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; TODO
+;; TODO - place this in bashrc (alias emacs="/Applications/Emacs.app/Contents/MacOS/Emacs")
+;; so that when we want to have a look at what vanilla
+;; emacs original keybindings are , you can just run "emacs -Q" in the terminal
+
+;; now we have these keys for navigation:
+;; C-0 , M-0 , C-M-0
+;; C-1 , M-1 , C-M-1
+;; C-2 , M-2 , C-M-2
+;; C-3 , M-3 , C-M-3
+;; C-4 , M-4 , C-M-4
+;; C-5 , M-5 , C-M-5
+;; C-6 , M-6 , C-M-6
+;; C-7 , M-7 , C-M-7
+;; C-8 , M-8 , C-M-8
+;; C-9 , M-9 , C-M-9
+
+;; C-<end>    , M-<end>    , C-M-<end>
+;; C-<prior>  , M-<prior>  , C-M-<prior>
+;; C-<help>   , M-<help>   , C-M-<help>
+;; C-<home>   , M-<home>   , C-M-<home>
+;; C-<next>   , M-<next>   , C-M-<next>
+;; C-<delete> , M-<delete> , C-M-<delete>
+
+;; <f9>  , <C-f9>  , <M-f9>  , <C-M-f9>
+;; <f10> , <C-f10> , <M-f10> , <C-M-f10>
+;; <f11> , <C-f11> , <M-f11> , <C-M-f11>
+;; <f12> , <C-f12> , <M-f12> , <C-M-f12>
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
