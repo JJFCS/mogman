@@ -765,19 +765,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(global-unset-key (kbd "C-<end>"))     ;; this is the 'end'       key on my logitech keyboard
-(global-unset-key (kbd "C-<prior>"))   ;; this is the 'page up'   key on my logitech keyboard
-(global-unset-key (kbd "C-<help>"))    ;; this is the 'insert'    key on my logitech keyboard
-(global-unset-key (kbd "C-<home>"))    ;; this is the 'home'      key on my logitech keyboard
-(global-unset-key (kbd "C-<next>"))    ;; this is the 'page down' key on my logitech keyboard
+(global-unset-key (kbd "C-<end>"   ))  ;; this is the 'end'       key on my logitech keyboard
+(global-unset-key (kbd "C-<prior>" ))  ;; this is the 'page up'   key on my logitech keyboard
+(global-unset-key (kbd "C-<help>"  ))  ;; this is the 'insert'    key on my logitech keyboard
+(global-unset-key (kbd "C-<home>"  ))  ;; this is the 'home'      key on my logitech keyboard
+(global-unset-key (kbd "C-<next>"  ))  ;; this is the 'page down' key on my logitech keyboard
 (global-unset-key (kbd "C-<delete>"))  ;; this is the 'delete'    key on my logitech keyboard
 
-(global-unset-key (kbd "M-<end>"))     (global-unset-key (kbd "C-M-<end>"))
-(global-unset-key (kbd "M-<prior>"))   (global-unset-key (kbd "C-M-<prior>"))
-(global-unset-key (kbd "M-<help>"))    (global-unset-key (kbd "C-M-<help>"))
-(global-unset-key (kbd "M-<home>"))    (global-unset-key (kbd "C-M-<home>"))
-(global-unset-key (kbd "M-<next>"))    (global-unset-key (kbd "C-M-<next>"))
-(global-unset-key (kbd "M-<delete>"))  (global-unset-key (kbd "C-M-<delete>"))
+(global-unset-key (kbd "M-<end>"   )) (global-unset-key (kbd "C-M-<end>"   ))
+(global-unset-key (kbd "M-<prior>" )) (global-unset-key (kbd "C-M-<prior>" ))
+(global-unset-key (kbd "M-<help>"  )) (global-unset-key (kbd "C-M-<help>"  ))
+(global-unset-key (kbd "M-<home>"  )) (global-unset-key (kbd "C-M-<home>"  ))
+(global-unset-key (kbd "M-<next>"  )) (global-unset-key (kbd "C-M-<next>"  ))
+(global-unset-key (kbd "M-<delete>")) (global-unset-key (kbd "C-M-<delete>"))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
