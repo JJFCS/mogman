@@ -360,8 +360,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; NOTE - Typical workflow:
 ;; - consult-ripgrep : "what you are looking for". Transient. once you select a line, other matches gone
-;; - deadgrep		 : creates a dedicated persistent buffer for your search results using ripgrep
-;; - wgrep			 : allows you to make a search result buffer editable
+;; - deadgrep        : creates a dedicated persistent buffer for your search results using ripgrep
+;; - wgrep           : allows you to make a search result buffer editable
 (use-package consult        :ensure t)
 (use-package deadgrep       :ensure t)
 (use-package wgrep          :ensure t)
@@ -483,19 +483,6 @@
                  '(c-ts-mode      . ("clangd")
     )
     )
-)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;;; DOCUMENTATION
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package devdocs    :ensure t
-    :config
-    (setq devdocs-browser-function #'eww)  ;; force eww renderer (this is to help with font display)
-    ;; make html inherit emacs faces
-    (setq shr-use-fonts  nil)
-    (setq shr-use-colors nil)
-    (setq devdocs-data-dir (expand-file-name "onemacs-cache/devdocs" user-emacs-directory)
-)
 )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
