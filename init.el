@@ -224,12 +224,12 @@
 (use-package gruber-darker-theme     :ensure t :defer t)
 (use-package jetbrains-darcula-theme :ensure t :defer t)
 (use-package naysayer-theme          :ensure t :defer t)
+(use-package nano-theme              :ensure t :defer t)
 (use-package weyland-yutani-theme    :ensure t :defer t)
 
 ;; NOTE - these packages tend to break more often (beware)
 (use-package pixel-themes   :vc (:url "https://github.com/lucasobx/pixel-themes"      :rev :newest))
 (use-package nerv-theme     :vc (:url "https://github.com/Senka07/nerv_theme.el"      :rev :newest))
-(use-package spaceink-theme :vc (:url "https://github.com/bcardoso/spaceink-theme"    :rev :newest))
 (use-package turbo-c-theme  :vc (:url "https://github.com/Senka07/turboc-emacs-theme" :rev :newest))
 
 ;; NOTE - breaks my emacs (weird)
@@ -733,7 +733,7 @@
 (define-key onncera-a-map (kbd "c") #'completion-at-point)  ;; corfu provides the UI, command is builtin
 (define-key onncera-a-map (kbd "h") #'view-lossage)
 (define-key onncera-a-map (kbd "s") #'avy-goto-line)
-(define-key onncera-a-map (kbd "t") #'onncera-term-shell)
+(define-key onncera-a-map (kbd "t") #'onncera-ansi-term)
 
 ;; example for non builtin commands
 ;; b - (reserved, example only, uncomment + fill in when needed)
@@ -832,8 +832,7 @@
 ;; ================================================================================
 
 ;; NOTE - packages to explore more:
-;; > crux   (https://github.com/bbatsov/crux)
-;; > nucleo (https://github.com/kn66/nucleo-completion.el)
+;; > nucleo (https://github.com/kn66/nucleo-completion.el)  ;; TODO - implement!
 ;; > yuta   (https://github.com/zenitsu7772000/yuta.el)
 
 ;;;; COLORFUL MODE
