@@ -51,8 +51,12 @@
 (setq enable-recursive-minibuffers t)
 (setq lossage-size 1000)
 (setq locate-command "mdfind")
+(setq kill-do-not-save-duplicates t)
+(setq global-auto-revert-non-file-buffers t)    ;; auto revert non-file buffers (e.g. dired)
 (setq display-line-numbers-type 'relative)
-(setq set-mark-command-repeat-pop t)  ;; after C-u C-SPC , keep popping the mark ring with just C-SPC instead of having to repeat the C-u prefix each time
+(setq redisplay-skip-fontification-on-input t)  ;; skip fontification during input (from doom emacs)
+(setq set-mark-command-repeat-pop t)            ;; after C-u C-SPC , keep popping the mark ring with just C-SPC instead of having to repeat the C-u prefix each time
+(setq savehist-additional-variables '(search-ring regexp-search-ring kill-ring))
 
 (setq-default truncate-lines t)
 
@@ -221,6 +225,7 @@
 (use-package standard-themes :ensure t :defer t) (use-package doric-themes :ensure t :defer t)
 (use-package doom-themes     :ensure t :defer t) (use-package moe-theme    :ensure t :defer t)
 
+(use-package base16-theme            :ensure t :defer t)
 (use-package gruber-darker-theme     :ensure t :defer t)
 (use-package jetbrains-darcula-theme :ensure t :defer t)
 (use-package naysayer-theme          :ensure t :defer t)
@@ -228,9 +233,10 @@
 (use-package weyland-yutani-theme    :ensure t :defer t)
 
 ;; NOTE - these packages tend to break more often (beware)
-(use-package pixel-themes   :vc (:url "https://github.com/lucasobx/pixel-themes"      :rev :newest))
-(use-package nerv-theme     :vc (:url "https://github.com/Senka07/nerv_theme.el"      :rev :newest))
-(use-package turbo-c-theme  :vc (:url "https://github.com/Senka07/turboc-emacs-theme" :rev :newest))
+(use-package pixel-themes   :vc (:url "https://github.com/lucasobx/pixel-themes"          :rev :newest))
+(use-package nerv-theme     :vc (:url "https://github.com/Senka07/nerv_theme.el"          :rev :newest))
+(use-package pierre-themes  :vc (:url "https://github.com/shaneikennedy/pierre-themes.el" :rev :newest))
+(use-package turbo-c-theme  :vc (:url "https://github.com/Senka07/turboc-emacs-theme"     :rev :newest))
 
 ;; NOTE - breaks my emacs (weird)
 ;; (use-package nvim-dark-theme
@@ -267,7 +273,7 @@
 (add-to-list 'custom-theme-load-path
         (expand-file-name "onemacs-theme" user-emacs-directory)
     )
-(onemacs-load-theme 'pixel-themes-alia16)  ;; here is where you declare what theme to use
+(onemacs-load-theme 'pierre-dark)  ;; here is where you declare what theme to use
 
 ;; @check TODO - done by AI
 ;; NOTE - not sure if I still want to include this
@@ -682,6 +688,18 @@
 (add-hook 'prog-mode-hook #'onncera-highlight-todo)
 (add-hook 'prog-mode-hook #'onncera-set-up-whitespace-handling)
 
+;; the kill ring can accumulate text properties - fonts, overlays, etc
+;; that bloat the savehist file. doom emacs strips them before saving
+(add-hook 'savehist-save-hook
+    (lambda ()
+        (setq kill-ring
+            (mapcar #'substring-no-properties
+                (cl-remove-if-not #'stringp kill-ring)
+            )
+        )
+    )
+)
+
 ;;;; imenu
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; @check TODO - done by AI
@@ -786,10 +804,10 @@
 (global-unset-key (kbd "<f11>")) (global-unset-key (kbd "C-M-<f11>"))
 (global-unset-key (kbd "<f12>")) (global-unset-key (kbd "C-M-<f12>"))
 
-(global-unset-key (kbd "C-<f9>" )) (global-unset-key (kbd "M-<f9>" ))
-(global-unset-key (kbd "C-<f10>")) (global-unset-key (kbd "M-<f10>"))
-(global-unset-key (kbd "C-<f11>")) (global-unset-key (kbd "M-<f11>"))
-(global-unset-key (kbd "C-<f12>")) (global-unset-key (kbd "M-<f12>"))
+(global-unset-key (kbd "C-<f9>" )) (global-unset-key (kbd "S-<f9>" )) (global-unset-key (kbd "M-<f9>" ))
+(global-unset-key (kbd "C-<f10>")) (global-unset-key (kbd "S-<f10>")) (global-unset-key (kbd "M-<f10>"))
+(global-unset-key (kbd "C-<f11>")) (global-unset-key (kbd "S-<f11>")) (global-unset-key (kbd "M-<f11>"))
+(global-unset-key (kbd "C-<f12>")) (global-unset-key (kbd "S-<f12>")) (global-unset-key (kbd "M-<f12>"))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; separated into blocks so we can visualise better
@@ -801,29 +819,7 @@
 ;; so that when we want to have a look at what vanilla
 ;; emacs original keybindings are , you can just run "emacs -Q" in the terminal
 
-;; now we have these keys for navigation:
-;; C-0 , M-0 , C-M-0
-;; C-1 , M-1 , C-M-1
-;; C-2 , M-2 , C-M-2
-;; C-3 , M-3 , C-M-3
-;; C-4 , M-4 , C-M-4
-;; C-5 , M-5 , C-M-5
-;; C-6 , M-6 , C-M-6
-;; C-7 , M-7 , C-M-7
-;; C-8 , M-8 , C-M-8
-;; C-9 , M-9 , C-M-9
 
-;; C-<end>    , M-<end>    , C-M-<end>
-;; C-<prior>  , M-<prior>  , C-M-<prior>
-;; C-<help>   , M-<help>   , C-M-<help>
-;; C-<home>   , M-<home>   , C-M-<home>
-;; C-<next>   , M-<next>   , C-M-<next>
-;; C-<delete> , M-<delete> , C-M-<delete>
-
-;; <f9>  , <C-f9>  , <M-f9>  , <C-M-f9>
-;; <f10> , <C-f10> , <M-f10> , <C-M-f10>
-;; <f11> , <C-f11> , <M-f11> , <C-M-f11>
-;; <f12> , <C-f12> , <M-f12> , <C-M-f12>
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
