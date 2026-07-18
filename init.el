@@ -391,13 +391,15 @@
 (use-package corfu
     :ensure t
     :config
-    (setq corfu-auto t)                ;; disable automatic popup (toggles between t & nil)
+    (setq corfu-auto t)                     ;; disable automatic popup (toggles between t & nil)
     (setq corfu-auto-delay 0.1)
     (setq corfu-auto-prefix 2)
     (setq corfu-cycle t)
-    (setq corfu-quit-at-boundary nil)  ;; never quit at completion boundary
-    (setq corfu-quit-no-match t)       ;; Quit if no match
-    (corfu-popupinfo-mode)             ;; popup information (like company-box)
+    (setq corfu-quit-at-boundary nil)       ;; never quit at completion boundary
+    (setq corfu-quit-no-match t)
+    (setq corfu-sort-override-function nil) ;; let nucleo's score order stand
+    (corfu-popupinfo-mode)                  ;; popup information (like company-box)
+    (corfu-history-mode)                    ;; needed for sort-ties-by-history (nucleo)
     (global-corfu-mode)
 )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -405,20 +407,61 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; @check TODO - done by AI
 (use-package cape
+
     :ensure t
     :config
-    (defun onncera-cape-capf-setup ()
-    (setq-local completion-at-point-functions
-    (list
-    (cape-capf-super
-        ;; #'eglot-completion-at-point  ;; uncomment if you want to use LSP
-        #'cape-file
-        #'cape-dabbrev)
-        #'cape-keyword
+
+    (defun onncera-cape-capf-setup-prog ()
+        "fallback capf stack for prog-mode buffers before/without an LSP server"
+        (setq-local completion-at-point-functions
+            (list (cape-capf-super #'cape-file #'cape-dabbrev)
+                #'cape-keyword)))
+
+    (defun onncera-cape-capf-setup-lsps ()
+        "capf stack once eglot is managing the buffer - LSP first, cape as fallback"
+        (setq-local completion-at-point-functions
+            (list (cape-capf-super #'eglot-completion-at-point #'cape-keyword)  ;; comment out "#'eglot-completion-at-point" if you do not want LSP
+                #'cape-file
+                #'cape-dabbrev)))
+
+    (defun onncera-cape-capf-setup-text ()
+        "capf stack for prose - text-mode"
+        (setq-local completion-at-point-functions
+            (list (cape-capf-super #'cape-dabbrev #'cape-dict)
+                #'cape-file)))
+
+    :hook
+    (prog-mode          . onncera-cape-capf-setup-prog)
+    (eglot-managed-mode . onncera-cape-capf-setup-lsps)
+    (text-mode          . onncera-cape-capf-setup-text)
+
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; NUCLEO
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; - NOTE : nucleo is a completion STYLE (like orderless). this overrides the completion-styles set by orderless above
+;; - NOTE : orderless is left configured above if you want it back per-category
+;;          (e.g. `(setq completion-category-overrides '((consult-grep (styles orderless))))`)
+(use-package nucleo-completion
+    :ensure t
+    :vc (:url "https://github.com/kn66/nucleo-completion.el" :rev :newest)
+    :demand t
+    :init
+    (nucleo-completion-ensure-module)  ;; Installs the rust scoring module
+    :config
+    (setq completion-styles '(nucleo basic))  ;; NOTE - may want to include orderless
+    (setq completion-category-overrides
+        '(
+             (eglot      (styles nucleo basic))
+             (eglot-capf (styles nucleo basic))
+             (file       (styles nucleo basic partial-completion))
+         )
     )
-    )
-    )
-    :hook (eglot-managed-mode . onncera-cape-capf-setup) (prog-mode . onncera-cape-capf-setup)
+    (setq nucleo-completion-sort-ties-by-history     t)
+    (setq nucleo-completion-sort-ties-by-length      t)
+    (setq nucleo-completion-sort-ties-alphabetically t)
+    (setq nucleo-completion-highlight-score-bands    t)
 )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -828,7 +871,7 @@
 ;; ================================================================================
 
 ;; NOTE - packages to explore more:
-;; > nucleo (https://github.com/kn66/nucleo-completion.el)  ;; TODO - implement!
+;; > Javelin
 ;; > yuta   (https://github.com/zenitsu7772000/yuta.el)
 
 ;;;; COLORFUL MODE
