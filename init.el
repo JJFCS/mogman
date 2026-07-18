@@ -536,6 +536,7 @@
 
     :config
     (setq eglot-ignored-server-capabilities '(:inlayHintProvider))
+    (setq eglot-autoshutdown t)  ;; kill the server when the last buffer closes
 
     (add-to-list 'eglot-server-programs
                  '(python-ts-mode . ("basedpyright-langserver" "--stdio")
