@@ -370,11 +370,6 @@
 ;; "setq prefix-help-command #'embark-prefix-help-command"
 (use-package embark-consult :ensure t)
 (use-package embark         :ensure t)
-
-;; TODO - move to the keybinding section or put it under the embark use-package
-(use-package emacs
-    :bind (("C-," . embark-act) ("C-." . embark-dwim))
-                                )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -570,13 +565,23 @@
 
 ;;;; AVY
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package avy :ensure t)
+(use-package avy              :ensure t)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;; CASUAL
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; TODO - check out other 'casual' packages - https://github.com/kickingvegas
-(use-package casual :ensure t)
+(use-package casual           :ensure t)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; EXPAND-REGION
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package expand-region    :ensure t)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; GOTO-LAST-CHANGE
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package goto-last-change :ensure t)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;; DISABLE MOUSE (INHIBIT)
@@ -626,24 +631,13 @@
 ;;;; MULTIPLE CURSORS (MC)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package multiple-cursors :ensure t :defer t
-    :init (setq mc/list-file "~/.emacs.d/onemacs-cache/mc-lists.el")
-    :bind (
-    ("M-p" . mc/mark-previous-like-this   )
-    ("M-n" . mc/mark-next-like-this       )
-    ("C-<" . mc/skip-to-previous-like-this)
-    ("C->" . mc/skip-to-next-like-this    )
-    )
-)
+    :init (setq mc/list-file "~/.emacs.d/onemacs-cache/mc-lists.el"))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;; MOVE TEXT
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package move-text
     :ensure t
-    :bind (
-        ("M-<down>" . move-text-down)
-        ("M-<up>"   . move-text-up)
-    )
     :config
     ;; Function advice to have Emacs re-indent the text in-and-around a text move
     (defun onncera-move-text-indent-region-advice (&rest _ignored)
@@ -793,10 +787,6 @@
 ;; @check TODO - done by AI
 (defvar onncera-a-map (make-sparse-keymap) "onncera C-c a prefix")
 (global-set-key (kbd "C-c a") onncera-a-map)
-(define-key onncera-a-map (kbd "a") #'avy-goto-char)
-(define-key onncera-a-map (kbd "c") #'completion-at-point)  ;; corfu provides the UI, command is builtin
-(define-key onncera-a-map (kbd "h") #'view-lossage)
-(define-key onncera-a-map (kbd "s") #'avy-goto-line)
 (define-key onncera-a-map (kbd "t") #'onncera-ansi-term)
 
 ;; example for non builtin commands
@@ -829,19 +819,26 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(global-unset-key (kbd "C-<end>"   ))  ;; this is the 'end'       key on my logitech keyboard
-(global-unset-key (kbd "C-<prior>" ))  ;; this is the 'page up'   key on my logitech keyboard
-(global-unset-key (kbd "C-<help>"  ))  ;; this is the 'insert'    key on my logitech keyboard
-(global-unset-key (kbd "C-<home>"  ))  ;; this is the 'home'      key on my logitech keyboard
-(global-unset-key (kbd "C-<next>"  ))  ;; this is the 'page down' key on my logitech keyboard
-(global-unset-key (kbd "C-<delete>"))  ;; this is the 'delete'    key on my logitech keyboard
+(global-unset-key (kbd "C-<end>"   )) (global-unset-key (kbd "M-<end>"   ))
+(global-unset-key (kbd "C-<prior>" )) (global-unset-key (kbd "M-<prior>" ))
+(global-unset-key (kbd "C-<help>"  )) (global-unset-key (kbd "M-<help>"  ))
+(global-unset-key (kbd "C-<home>"  )) (global-unset-key (kbd "M-<home>"  ))
+(global-unset-key (kbd "C-<next>"  )) (global-unset-key (kbd "M-<next>"  ))
+(global-unset-key (kbd "C-<delete>")) (global-unset-key (kbd "M-<delete>"))
 
-(global-unset-key (kbd "M-<end>"   )) (global-unset-key (kbd "C-M-<end>"   ))
-(global-unset-key (kbd "M-<prior>" )) (global-unset-key (kbd "C-M-<prior>" ))
-(global-unset-key (kbd "M-<help>"  )) (global-unset-key (kbd "C-M-<help>"  ))
-(global-unset-key (kbd "M-<home>"  )) (global-unset-key (kbd "C-M-<home>"  ))
-(global-unset-key (kbd "M-<next>"  )) (global-unset-key (kbd "C-M-<next>"  ))
-(global-unset-key (kbd "M-<delete>")) (global-unset-key (kbd "C-M-<delete>"))
+(global-unset-key (kbd "<end>"   ))      ;; this is the 'end'       key on my logitech keyboard
+(global-unset-key (kbd "<prior>" ))      ;; this is the 'page up'   key on my logitech keyboard
+(global-unset-key (kbd "<help>"  ))      ;; this is the 'insert'    key on my logitech keyboard
+(global-unset-key (kbd "<home>"  ))      ;; this is the 'home'      key on my logitech keyboard
+(global-unset-key (kbd "<next>"  ))      ;; this is the 'page down' key on my logitech keyboard
+(global-unset-key (kbd "<deletechar>"))  ;; this is the 'delete'    key on my logitech keyboard
+
+(global-unset-key (kbd "C-M-<end>"   ))
+(global-unset-key (kbd "C-M-<prior>" ))
+(global-unset-key (kbd "C-M-<help>"  ))
+(global-unset-key (kbd "C-M-<home>"  ))
+(global-unset-key (kbd "C-M-<next>"  ))
+(global-unset-key (kbd "C-M-<delete>"))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -849,11 +846,17 @@
 (global-unset-key (kbd "<f10>")) (global-unset-key (kbd "C-M-<f10>"))
 (global-unset-key (kbd "<f11>")) (global-unset-key (kbd "C-M-<f11>"))
 (global-unset-key (kbd "<f12>")) (global-unset-key (kbd "C-M-<f12>"))
+(global-unset-key (kbd "<f13>")) (global-unset-key (kbd "C-M-<f13>"))
+(global-unset-key (kbd "<f14>")) (global-unset-key (kbd "C-M-<f14>"))
+(global-unset-key (kbd "<f15>")) (global-unset-key (kbd "C-M-<f15>"))
 
 (global-unset-key (kbd "C-<f9>" )) (global-unset-key (kbd "S-<f9>" )) (global-unset-key (kbd "M-<f9>" ))
 (global-unset-key (kbd "C-<f10>")) (global-unset-key (kbd "S-<f10>")) (global-unset-key (kbd "M-<f10>"))
 (global-unset-key (kbd "C-<f11>")) (global-unset-key (kbd "S-<f11>")) (global-unset-key (kbd "M-<f11>"))
 (global-unset-key (kbd "C-<f12>")) (global-unset-key (kbd "S-<f12>")) (global-unset-key (kbd "M-<f12>"))
+(global-unset-key (kbd "C-<f13>")) (global-unset-key (kbd "S-<f13>")) (global-unset-key (kbd "M-<f13>"))
+(global-unset-key (kbd "C-<f14>")) (global-unset-key (kbd "S-<f14>")) (global-unset-key (kbd "M-<f14>"))
+(global-unset-key (kbd "C-<f15>")) (global-unset-key (kbd "S-<f15>")) (global-unset-key (kbd "M-<f15>"))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; separated into blocks so we can visualise better
@@ -865,7 +868,54 @@
 ;; so that when we want to have a look at what vanilla
 ;; emacs original keybindings are , you can just run "emacs -Q" in the terminal
 
+;; ORDER
+;; - move-text
+;; - expand-region
+;; - edited last & mark ring navigation
+;; - avy
+;; - Jumping by function
+;; - sexp - balanced expression
+;; - xref
+;; - multiple-cursors
+;; - version control - programming navigation workflow
+;; - embark
 
+(global-set-key (kbd "<prior>")      'move-text-up)
+(global-set-key (kbd "<next>")       'move-text-down)
+(global-set-key (kbd "<home>")       'er/expand-region)
+(global-set-key (kbd "<end>")        'er/contract-region)
+(global-set-key (kbd "<help>")       'goto-last-change)       ;; An Emacs package to move point through buffer-undo-list positions
+(global-set-key (kbd "<deletechar>") 'pop-to-mark-command)    ;; pop back through recent cursor positions in the current buffer
+
+(setq avy-timeout-seconds 1.0)
+(global-set-key (kbd "C-0")   'avy-goto-char-timer)           ;; input an arbitrary amount of consecutive chars
+(global-set-key (kbd "M-0")   'avy-goto-char)                 ;; input one char , jump to it with a tree
+(global-set-key (kbd "C-M-0") 'avy-goto-line)                 ;; input zero chars , jump to a line start with a tree
+(global-set-key (kbd "C-1")   'end-of-defun)
+(global-set-key (kbd "C-2")   'beginning-of-defun)
+(global-set-key (kbd "C-3")   'mark-defun)
+(global-set-key (kbd "C-4")   'backward-sexp)
+(global-set-key (kbd "C-5")   'forward-sexp)
+(global-set-key (kbd "C-6")   'mark-sexp)
+(global-set-key (kbd "C-7")   'xref-go-back)
+(global-set-key (kbd "C-8")   'xref-find-definitions)
+(global-set-key (kbd "C-9")   'xref-find-references)
+
+(global-set-key (kbd "<f9>")  'mc/mark-next-like-this)        ;; NOTE - need to select a region
+(global-set-key (kbd "<f10>") 'mc/mark-previous-like-this)    ;; NOTE - need to select a region
+(global-set-key (kbd "<f11>") 'mc/mark-next-like-this)
+(global-set-key (kbd "<f12>") 'mc/mark-previous-like-this)
+(global-set-key (kbd "<f13>") 'mc/mark-all-symbols-like-this-in-defun)
+(global-set-key (kbd "<f14>") 'mc/vertical-align-with-space)  ;; NOTE - select a region & add MCs with 'edit-lines' , then move to the end of the line and run this command
+(global-set-key (kbd "<f15>") 'mc/edit-lines)
+
+(global-set-key (kbd "C-<f9>")  'git-gutter:next-hunk)
+(global-set-key (kbd "C-<f10>") 'git-gutter:previous-hunk)
+(global-set-key (kbd "C-<f11>") 'git-gutter:popup-hunk)
+(global-set-key (kbd "C-<f12>") 'magit-log-buffer-file)
+
+(global-set-key (kbd "C-,") 'embark-act)
+(global-set-key (kbd "C-.") 'embark-dwim)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
