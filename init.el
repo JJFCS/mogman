@@ -263,9 +263,9 @@
 
 (defun onemacs-apply-fonts ()
     "apply personal font configuration"
-    (set-face-attribute 'default nil        :family "MartianMono Nerd Font Mono" :height 120 :width 'condensed :weight 'regular :slant 'normal)
-    (set-face-attribute 'fixed-pitch nil    :family "MartianMono Nerd Font Mono" :height 120 :width 'condensed :weight 'regular :slant 'normal)
-    (set-face-attribute 'variable-pitch nil :family "Merriweather" :height 120)
+    (set-face-attribute 'default nil        :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
+    (set-face-attribute 'fixed-pitch nil    :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
+    (set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
     (set-face-attribute 'completions-annotations nil :slant 'normal)
     (set-face-attribute 'completions-common-part nil :slant 'normal)
 )
