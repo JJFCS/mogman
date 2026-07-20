@@ -229,14 +229,15 @@
 (use-package gruber-darker-theme     :ensure t :defer t)
 (use-package jetbrains-darcula-theme :ensure t :defer t)
 (use-package naysayer-theme          :ensure t :defer t)
-(use-package nano-theme              :ensure t :defer t)
-(use-package weyland-yutani-theme    :ensure t :defer t)
+(use-package vscode-dark-plus-theme  :ensure t :defer t) (use-package kaolin-themes :ensure t :defer t)
 
 ;; NOTE - these packages tend to break more often (beware)
-(use-package pixel-themes   :vc (:url "https://github.com/lucasobx/pixel-themes"          :rev :newest))
-(use-package nerv-theme     :vc (:url "https://github.com/Senka07/nerv_theme.el"          :rev :newest))
-(use-package pierre-themes  :vc (:url "https://github.com/shaneikennedy/pierre-themes.el" :rev :newest))
-(use-package turbo-c-theme  :vc (:url "https://github.com/Senka07/turboc-emacs-theme"     :rev :newest))
+(use-package hyperstitional-themes   :vc (:url "https://github.com/precompute/hyperstitional-themes" :rev :newest))
+(use-package sculpture-themes        :vc (:url "https://github.com/precompute/sculpture-themes"      :rev :newest))
+(use-package pixel-themes            :vc (:url "https://github.com/lucasobx/pixel-themes"            :rev :newest))
+(use-package nerv-theme              :vc (:url "https://github.com/Senka07/nerv_theme.el"            :rev :newest))
+(use-package pierre-themes           :vc (:url "https://github.com/shaneikennedy/pierre-themes.el"   :rev :newest))
+(use-package turbo-c-theme           :vc (:url "https://github.com/Senka07/turboc-emacs-theme"       :rev :newest))
 
 ;; NOTE - breaks my emacs (weird)
 ;; (use-package nvim-dark-theme
@@ -273,7 +274,7 @@
 (add-to-list 'custom-theme-load-path
         (expand-file-name "onemacs-theme" user-emacs-directory)
     )
-(onemacs-load-theme 'pierre-dark)  ;; here is where you declare what theme to use
+(onemacs-load-theme 'pixel-themes-alia16)  ;; here is where you declare what theme to use
 
 ;; @check TODO - done by AI
 ;; NOTE - not sure if I still want to include this
