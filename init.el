@@ -585,6 +585,16 @@
 (use-package goto-last-change :ensure t)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;;; JAVELIN
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package javelin
+    :ensure t
+    :config
+    (global-javelin-minor-mode 1)
+    (setq javelin-minor-mode-map (make-sparse-keymap))  ;; wipe all default bindings
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;;; DISABLE MOUSE (INHIBIT)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package inhibit-mouse
@@ -902,18 +912,26 @@
 (global-set-key (kbd "C-8")   'xref-find-definitions)
 (global-set-key (kbd "C-9")   'xref-find-references)
 
-(global-set-key (kbd "<f9>")  'mc/mark-next-like-this)        ;; NOTE - need to select a region
-(global-set-key (kbd "<f10>") 'mc/mark-previous-like-this)    ;; NOTE - need to select a region
-(global-set-key (kbd "<f11>") 'mc/mark-next-like-this)
-(global-set-key (kbd "<f12>") 'mc/mark-previous-like-this)
-(global-set-key (kbd "<f13>") 'mc/mark-all-symbols-like-this-in-defun)
-(global-set-key (kbd "<f14>") 'mc/vertical-align-with-space)  ;; NOTE - select a region & add MCs with 'edit-lines' , then move to the end of the line and run this command
-(global-set-key (kbd "<f15>") 'mc/edit-lines)
+(global-set-key (kbd "<f9>")  'javelin-go-or-assign-to-1)
+(global-set-key (kbd "<f10>") 'javelin-go-or-assign-to-2)
+(global-set-key (kbd "<f11>") 'javelin-go-or-assign-to-3)
+(global-set-key (kbd "<f12>") 'javelin-go-or-assign-to-4)
+(global-set-key (kbd "<f13>") 'javelin-delete)  ;; delete a specific position for the current project/branch
+(global-set-key (kbd "<f14>") 'javelin-clear)   ;; delete all positions for current project/branch
+(global-set-key (kbd "<f15>") 'javelin-toggle-quick-menu)
 
-(global-set-key (kbd "C-<f9>")  'git-gutter:next-hunk)
-(global-set-key (kbd "C-<f10>") 'git-gutter:previous-hunk)
-(global-set-key (kbd "C-<f11>") 'git-gutter:popup-hunk)
-(global-set-key (kbd "C-<f12>") 'magit-log-buffer-file)
+(global-set-key (kbd "C-<f9>")  'mc/mark-next-like-this)        ;; NOTE - need to select a region
+(global-set-key (kbd "C-<f10>") 'mc/mark-previous-like-this)    ;; NOTE - need to select a region
+(global-set-key (kbd "C-<f11>") 'mc/mark-next-like-this)
+(global-set-key (kbd "C-<f12>") 'mc/mark-previous-like-this)
+(global-set-key (kbd "C-<f13>") 'mc/mark-all-symbols-like-this-in-defun)
+(global-set-key (kbd "C-<f14>") 'mc/vertical-align-with-space)  ;; NOTE - select a region & add MCs with 'edit-lines' , then move to the end of the line and run this command
+(global-set-key (kbd "C-<f15>") 'mc/edit-lines)
+
+(global-set-key (kbd "M-<f9>")  'git-gutter:next-hunk)
+(global-set-key (kbd "M-<f10>") 'git-gutter:previous-hunk)
+(global-set-key (kbd "M-<f11>") 'git-gutter:popup-hunk)
+(global-set-key (kbd "M-<f12>") 'magit-log-buffer-file)
 
 (global-set-key (kbd "C-,") 'embark-act)
 (global-set-key (kbd "C-.") 'embark-dwim)
