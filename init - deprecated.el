@@ -1,0 +1,991 @@
+;; -*- lexical-binding: t; -*-
+
+;; flow:
+;; X - CUSTOM FILE
+;; XX - PACKAGE MANAGEMENT
+;; XXX - GENERAL SETTINGS
+;; XXXX - FUNCTIONS / VARIABLES - PART 1
+;; XXXXX - THEMES / FONTS / APPEARANCES
+;; XXXXXX - COMPLETIONS / MINIBUFFER
+;; XXXXXXX - PROGRAMMING
+;; XXXXXXXX - CONVENIENCE
+;; XXXXXXXXX - FUNCTIONS / VARIABLES - PART 2
+;; XXXXXXXXXX - HOOKS
+;; XXXXXXXXXXX - KEYBINDINGS
+;; XXXXXXXXXXXX - TESTING PLAYGROUND
+
+;; TODO - sub topics for imenu (e.g. use for areas like ";;;; HELM")
+;; e.g. @subtopic-1
+;; e.g. @subtopic-2
+;; e.g. etc
+
+;; ================================================================================
+;; @topic CUSTOM FILE
+;; ================================================================================
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(load custom-file t)
+
+
+;; ================================================================================
+;; @topic PACKAGE MANAGEMENT
+;; ================================================================================
+(require 'package)
+(setq package-archives '(
+    ("melpa" . "https://melpa.org/packages/") ("elpa" . "https://elpa.gnu.org/packages/")
+            )
+)
+
+(unless (package-installed-p 'use-package) (package-refresh-contents) (package-install 'use-package))
+(require 'use-package)
+
+
+;; ================================================================================
+;; @topic GENERAL SETTINGS
+;; ================================================================================
+(add-to-list 'exec-path "/opt/homebrew/bin")
+
+;; NOTE - for variables we use 't' or 'nil'
+;; NOTE - for functions we use numbers (1 == enabled , 0 == disabled , no number means toggle)
+(setq inhibit-splash-screen t)
+(setq insert-directory-program "gls")
+(setq enable-recursive-minibuffers t)
+(setq lossage-size 1000)
+(setq locate-command "mdfind")
+(setq kill-do-not-save-duplicates t)
+(setq global-auto-revert-non-file-buffers t)    ;; auto revert non-file buffers (e.g. dired)
+(setq display-line-numbers-type 'relative)
+(setq redisplay-skip-fontification-on-input t)  ;; skip fontification during input (from doom emacs)
+(setq set-mark-command-repeat-pop t)            ;; after C-u C-SPC , keep popping the mark ring with just C-SPC instead of having to repeat the C-u prefix each time
+(setq savehist-additional-variables '(search-ring regexp-search-ring kill-ring))
+
+(setq-default truncate-lines t)
+
+(put 'upcase-region 'disabled nil) (put 'downcase-region 'disabled nil)
+
+(blink-cursor-mode 0)
+(delete-selection-mode 1)
+(electric-pair-mode 1)
+(fringe-mode 0)
+
+(setq recentf-save-file "~/.emacs.d/onemacs-cache/recentf")  ;; NOTE - hardcoding the path
+(setq savehist-file     "~/.emacs.d/onemacs-cache/history")  ;; NOTE - hardcoding the path
+(recentf-mode 1) (savehist-mode 1)  ;; NOTE - to del M-x history go to onemacs-cache & delete the "history" file
+
+(global-auto-revert-mode)           ;; auto refresh file buffers when the file on disk changes outside of emacs
+(global-visual-wrap-prefix-mode)    ;; wrapped lines respect the indentation of the original file
+(global-display-line-numbers-mode)
+(global-hl-line-mode)
+
+;; @check TODO - done by AI
+;; creating the necessary directories
+(defconst my-cache-dir (expand-file-name "onemacs-cache/" user-emacs-directory))
+(dolist (dir '("backups" "autosave" "auto-save-list")) (make-directory (expand-file-name dir my-cache-dir) t))
+
+;; for backups/autosave/etc
+(setq backup-directory-alist `(("." . ,(expand-file-name "onemacs-cache/backups/" user-emacs-directory))))
+
+;; for when emacs crashes
+;; these are not backups , it is a crash recovery file
+;; these are created while you are editing
+(setq auto-save-file-name-transforms `((".*" ,(expand-file-name "onemacs-cache/autosave/" user-emacs-directory) t)))
+
+;; emacs maintains a list of active auto-save files
+;; exist so emacs can find recovery files
+(setq auto-save-list-file-prefix
+    (expand-file-name "onemacs-cache/auto-save-list/.saves-"
+            user-emacs-directory))
+
+
+;; ================================================================================
+;; @topic FUNCTIONS / VARIABLES - PART 1
+;; ================================================================================
+;; NOTE - part one because some functions need to be defined earlier than others
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(defun onncera-highlight-todo ()
+    "Highlight important annotation keywords"
+    (font-lock-add-keywords nil `((,(concat "\\<" (regexp-opt '("TODO" "FIXME" "BUG" "NOTE")) "\\>")
+        0
+        '(:foreground "red" :weight bold)
+        t
+            )
+        )
+    )
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(defun onncera-smart-beginning-of-line ()
+    "moves cursor to first non-whitespace char or beg of line. alternates if called repeatedly"
+    (interactive)
+    (let ((old-point (point)))
+        (back-to-indentation)
+        (when (= old-point (point))
+            (beginning-of-line)
+        )
+    )
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(defun onncera-set-up-whitespace-handling ()
+    "whitespace mode with trailing line protection"
+    (interactive)
+    (whitespace-mode)
+        (setq-local delete-trailing-lines nil)  ;; stops emacs from deleting empty lines at the bottom of file
+        (add-hook 'before-save-hook #'delete-trailing-whitespace nil t)
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(defun onncera-helm-imenu-right ()
+    "run helm-imenu with the Helm window on the right"
+    (interactive)
+    (let ((helm-split-window-default-side 'right))
+    (helm-imenu)
+    )
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; https://www.youtube.com/watch?v=M7-dJb2GTN4 (sacha chua & omar antolin camarena)
+;; block-undo (undo keyboard macros in a single step)
+(defun block-undo (fn &rest args)
+    "Apply FN to ARGS in such a way that it can be undone in a single step"
+    (undo-boundary)
+    (with-undo-amalgamate
+        (apply fn args)
+    )
+)
+
+(dolist (fn '(
+                kmacro-call-macro
+                kmacro-exec-ring-item
+                apply-macro-to-region-lines
+            )
+        )
+    (advice-add fn :around #'block-undo)
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(defun onncera-set-hl-line-color ()
+    "select a color and set it as the hl-line background"
+    (interactive)
+    (require 'facemenu)
+    (let ((color (completing-read
+            "HL-line color: "
+            (defined-colors)
+        )
+        )
+        )
+    (set-face-attribute 'hl-line nil :background color)
+    (message "hl-line background set to: %s" color)
+    )
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(defvar onncera-term-shell "/bin/bash" "The default shell path used for custom terminal commands")
+(defun onncera-ansi-term ()
+    "Launch `ansi-term` instantly using `onncera-term-shell` without prompting"
+    (interactive)
+    (ansi-term onncera-term-shell)
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; ================================================================================
+;; @topic THEMES / FONTS / APPEARANCES
+;; ================================================================================
+
+;; cool themes:
+;; - doom-old-hope
+;; - doom-plain-dark
+;; - doom-spacegrey
+;; - doric-cherry
+;; - gruber-darker
+;; - naysayer
+;; - nerv-theme
+;; - pixel-themes-alia16
+;; - standard-dark
+;; - turbo-c
+;; - tango-dark
+;; - tsdh-dark
+;; - weyland-yutani
+;; - wheatgrass
+
+(use-package ef-themes       :ensure t :defer t) (use-package modus-themes :ensure t :defer t)
+(use-package standard-themes :ensure t :defer t) (use-package doric-themes :ensure t :defer t)
+(use-package doom-themes     :ensure t :defer t) (use-package moe-theme    :ensure t :defer t)
+
+(use-package base16-theme            :ensure t :defer t)
+(use-package gruber-darker-theme     :ensure t :defer t)
+(use-package jetbrains-darcula-theme :ensure t :defer t)
+(use-package naysayer-theme          :ensure t :defer t)
+(use-package vscode-dark-plus-theme  :ensure t :defer t) (use-package kaolin-themes :ensure t :defer t)
+
+;; NOTE - these packages tend to break more often (beware)
+(use-package hyperstitional-themes   :vc (:url "https://github.com/precompute/hyperstitional-themes" :rev :newest))
+(use-package sculpture-themes        :vc (:url "https://github.com/precompute/sculpture-themes"      :rev :newest))
+(use-package pixel-themes            :vc (:url "https://github.com/lucasobx/pixel-themes"            :rev :newest))
+(use-package nerv-theme              :vc (:url "https://github.com/Senka07/nerv_theme.el"            :rev :newest))
+(use-package pierre-themes           :vc (:url "https://github.com/shaneikennedy/pierre-themes.el"   :rev :newest))
+(use-package turbo-c-theme           :vc (:url "https://github.com/Senka07/turboc-emacs-theme"       :rev :newest))
+
+;; NOTE - breaks my emacs (weird)
+;; (use-package nvim-dark-theme
+;;     :vc (:url "https://github.com/mang-jin/emacs-theme-nvim-dark"
+;;     :rev :newest)
+;;     )
+
+;; @check TODO - done by AI
+(defun onemacs-load-theme (themes)
+    "disable current themes and load THEME cleanly"
+    (interactive
+    (list (intern (completing-read
+        "Theme: "
+        (custom-available-themes)
+    )
+    )
+    )
+    )
+
+    (mapc #'disable-theme custom-enabled-themes)  ;; disable all active themes
+    (load-theme themes t)  ;; load the requested theme
+    (onemacs-apply-fonts)  ;; reapply personal faces (fonts)
+)
+
+(defun onemacs-apply-fonts ()
+    "apply personal font configuration"
+    (set-face-attribute 'default nil        :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
+    (set-face-attribute 'fixed-pitch nil    :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
+    (set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
+    (set-face-attribute 'completions-annotations nil :slant 'normal)
+    (set-face-attribute 'completions-common-part nil :slant 'normal)
+)
+
+(add-to-list 'custom-theme-load-path
+        (expand-file-name "onemacs-theme" user-emacs-directory)
+    )
+(onemacs-load-theme 'pixel-themes-alia16)  ;; here is where you declare what theme to use
+
+;; @check TODO - done by AI
+;; NOTE - not sure if I still want to include this
+;; (defun onncera/theme-settings-veto-general ()
+;; "remove italics , disable bold , set highlight line color"
+;; (dolist (face (face-list)) (when (face-attribute face :slant nil 'default) (set-face-attribute face nil :slant 'normal)))
+;;     ;; disable italics
+;;     (set-face-attribute 'font-lock-comment-face nil
+;;         :slant 'normal)
+;;     (set-face-attribute 'font-lock-doc-face nil
+;;         :slant 'normal)
+;;     (set-face-attribute 'italic nil
+;;         :slant 'normal)
+;;     ;; disable bold
+;;     (set-face-attribute 'bold nil
+;;         :weight 'normal)
+;;     ;; hl-line
+;;     (when (facep 'hl-line) (set-face-attribute 'hl-line nil :background "midnight blue"))
+;; )
+
+;; (defun onncera/theme-settings (&rest _) "run theme overrides safely after theme changes"
+;;     (run-at-time 0 nil (lambda () (onncera/theme-settings-veto-general)  ;; Implement for every single theme
+;;         )
+;;     )
+;; )
+
+;; (advice-add 'load-theme   :after #'onncera/theme-settings)
+;; (advice-add 'enable-theme :after #'onncera/theme-settings)
+
+
+;; ================================================================================
+;; @topic COMPLETIONS / MINIBUFFER
+;; ================================================================================
+;; - NOTE : dependencies
+;; > grep
+;; > ripgrep
+
+;;;; HELM
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; - NOTE: C-o does the toggling in helm-mode
+;; - NOTE: currently using which-key.. to use helm-descbinds, uncomment use-package block below
+
+;; - NOTE: the reason we do not turn on "helm-mode" is because we only want to use helm for certain things
+;; - NOTE: this prevents it from interfering with other completion systems
+
+;; - TODO: INCLUDE THE FOLLOWING MODULES === HELM-PROJECTILE, HELM-SWOOP, helm-M-x-show-short-doc
+(use-package helm-describe-modes :ensure t)
+(use-package helm
+    :ensure t
+    :config
+    (require 'helm-buffers)
+    (require 'helm-imenu)
+    (setq helm-imenu-delimiter " = ")
+    :bind (:map helm-map
+        ("TAB" . helm-execute-persistent-action)
+        ("C-j" . helm-select-action)
+    )
+)
+
+;; (use-package helm-descbinds
+;;     :ensure t
+;;     :init (helm-descbinds-mode) (setq prefix-help-command #'helm-descbinds)
+;; )
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; VOMECCC
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package marginalia :ensure t :config (setq marginalia-align 'right) (marginalia-mode))
+(use-package orderless  :ensure t
+    :config
+    (setq completion-styles '(orderless basic)
+            )
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package vertico :ensure t
+    :config
+    (require 'vertico-multiform)
+    (vertico-mode)
+    (vertico-multiform-mode)
+    (setq vertico-multiform-categories '((file (vertico-sort-function . onncera-vertico-find-file))))
+    (setq vertico-multiform-commands '(
+        (consult-find buffer)
+        (consult-grep buffer)
+        (consult-line buffer)
+        )
+    )
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; NOTE - If you want to replace helm-descbinds:
+;; "setq prefix-help-command #'embark-prefix-help-command"
+(use-package embark-consult :ensure t)
+(use-package embark         :ensure t)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; NOTE - Typical workflow:
+;; - consult-ripgrep : "what you are looking for". Transient. once you select a line, other matches gone
+;; - deadgrep        : creates a dedicated persistent buffer for your search results using ripgrep
+;; - wgrep           : allows you to make a search result buffer editable
+(use-package consult        :ensure t)
+(use-package deadgrep       :ensure t)
+(use-package wgrep          :ensure t)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package corfu
+    :ensure t
+    :config
+    (setq corfu-auto t)                     ;; disable automatic popup (toggles between t & nil)
+    (setq corfu-auto-delay 0.1)
+    (setq corfu-auto-prefix 2)
+    (setq corfu-cycle t)
+    (setq corfu-quit-at-boundary nil)       ;; never quit at completion boundary
+    (setq corfu-quit-no-match t)
+    (setq corfu-sort-override-function nil) ;; let nucleo's score order stand
+    (corfu-popupinfo-mode)                  ;; popup information (like company-box)
+    (corfu-history-mode)                    ;; needed for sort-ties-by-history (nucleo)
+    (global-corfu-mode)
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(use-package cape
+
+    :ensure t
+    :config
+
+    (defun onncera-cape-capf-setup-prog ()
+        "fallback capf stack for prog-mode buffers before/without an LSP server"
+        (setq-local completion-at-point-functions
+            (list (cape-capf-super #'cape-file #'cape-dabbrev)
+                #'cape-keyword)))
+
+    (defun onncera-cape-capf-setup-lsps ()
+        "capf stack once eglot is managing the buffer - LSP first, cape as fallback"
+        (setq-local completion-at-point-functions
+            (list (cape-capf-super #'eglot-completion-at-point #'cape-keyword)  ;; comment out "#'eglot-completion-at-point" if you do not want LSP
+                #'cape-file
+                #'cape-dabbrev)))
+
+    (defun onncera-cape-capf-setup-text ()
+        "capf stack for prose - text-mode"
+        (setq-local completion-at-point-functions
+            (list (cape-capf-super #'cape-dabbrev #'cape-dict)
+                #'cape-file)))
+
+    :hook
+    (prog-mode          . onncera-cape-capf-setup-prog)
+    (eglot-managed-mode . onncera-cape-capf-setup-lsps)
+    (text-mode          . onncera-cape-capf-setup-text)
+
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; NUCLEO
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; - NOTE : nucleo is a completion STYLE (like orderless). this overrides the completion-styles set by orderless above
+;; - NOTE : orderless is left configured above if you want it back per-category
+;;          (e.g. `(setq completion-category-overrides '((consult-grep (styles orderless))))`)
+(use-package nucleo-completion
+    :ensure t
+    :vc (:url "https://github.com/kn66/nucleo-completion.el" :rev :newest)
+    :demand t
+    :init
+    (setq nucleo-completion-module-directory
+        (expand-file-name "nucleo-completion/" "~/.emacs.d/onemacs-cache/"))
+    (nucleo-completion-ensure-module)  ;; Installs the rust scoring module
+    :config
+    (setq completion-styles '(nucleo basic))  ;; NOTE - may want to include orderless
+    (setq completion-category-overrides
+        '(
+             (eglot      (styles nucleo basic))
+             (eglot-capf (styles nucleo basic))
+             (file       (styles nucleo basic partial-completion))
+         )
+    )
+    (setq nucleo-completion-sort-ties-by-history     t)
+    (setq nucleo-completion-sort-ties-by-length      t)
+    (setq nucleo-completion-sort-ties-alphabetically t)
+    (setq nucleo-completion-highlight-score-bands    t)
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; ================================================================================
+;; @topic PROGRAMMING
+;; ================================================================================
+;; - NOTE : dependencies
+;; > brew install basedpyright
+;; > brew install llvm
+
+;;;; TREESITTER
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; NOTE - we are using TS so take note of how we modify certain modes
+;; NOTE - once grammars installed, move ---> "~/.emacs.d/onemacs-cache/onemacs-language-grammars"
+(setq treesit-extra-load-path '("~/.emacs.d/onemacs-cache/onemacs-language-grammars"))
+(use-package treesit-auto
+    :ensure t
+    :config
+    (setq treesit-auto-install 'prompt)
+    (treesit-auto-add-to-auto-mode-alist 'all)
+    (global-treesit-auto-mode)
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; TABS / INDENTS / SPACES / WHITESPACES / ETC
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq whitespace-style
+    '(face indentation newline tabs tab-mark trailing
+        spaces
+        space-before-tab
+        space-after-tab
+        space-mark
+    )
+)
+
+;; reads a .editorconfig file from project root to apply formatting preferences
+;; such as spaces vs tabs, indentation width, whitespace rules, etc.
+;; It does not control emacs indentation behavior or TAB/RET key actions
+(editorconfig-mode 1)
+(electric-indent-mode 0)
+
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 4)
+
+(setq-default c-basic-offset 4)
+(setq-default c-ts-mode-indent-offset 4)
+(setq-default python-indent-offset 4)
+(setq python-indent-guess-indent-offset nil)  ;; because we are using editorconfig-mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; PYTHON
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package pyvenv :ensure t)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; GIT / VC / MAGIT / ETC
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package git-gutter :ensure t :hook (prog-mode . git-gutter-mode))
+(use-package magit      :ensure t :defer t)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; EGLOT
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(use-package eglot
+    :hook
+    (
+        (python-ts-mode . eglot-ensure)
+        (c-ts-mode      . eglot-ensure)
+    )
+
+    :config
+    (setq eglot-ignored-server-capabilities '(:inlayHintProvider))
+    (setq eglot-autoshutdown t)  ;; kill the server when the last buffer closes
+
+    (add-to-list 'eglot-server-programs
+                 '(python-ts-mode . ("basedpyright-langserver" "--stdio")
+    )
+    )
+
+    (add-to-list 'eglot-server-programs
+                 '(c-ts-mode      . ("clangd")
+    )
+    )
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; PROJECTILE
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package projectile :ensure t
+    :config
+    (setq projectile-known-projects-file "~/.emacs.d/onemacs-cache/projectile-bookmarks.eld")  ;; TODO - is this right?
+    (projectile-mode)
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; ================================================================================
+;; @topic CONVENIENCE
+;; ================================================================================
+;; - NOTE : dependencies
+;; > brew install pkg-config poppler autoconf automake
+
+;;;; AVY
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package avy              :ensure t)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; CASUAL
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; TODO - check out other 'casual' packages - https://github.com/kickingvegas
+(use-package casual           :ensure t)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; EXPAND-REGION
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package expand-region    :ensure t)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; GOTO-LAST-CHANGE
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package goto-last-change :ensure t)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; JAVELIN
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package javelin
+    :ensure t
+    :config
+    (global-javelin-minor-mode 1)
+    (setq javelin-minor-mode-map (make-sparse-keymap))  ;; wipe all default bindings
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; DISABLE MOUSE (INHIBIT)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package inhibit-mouse
+    :ensure t
+    :config
+    (setq inhibit-mouse-excluded-modes '(pdf-view-mode devdocs-mode))  ;; can use mouse in these modes
+    (inhibit-mouse-mode 1)
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; KEYCAST
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package keycast :ensure t
+    :config
+    (keycast-tab-bar-mode)
+    (setq keycast-window-predicate #'always)
+    (setq keycast-substitute-alist '())
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; WHICH-KEY
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package which-key
+    :config
+    (setq which-key-show-early-on-C-h t)
+    (setq which-key-idle-delay 1e6)
+    (setq which-key-idle-secondary-delay 0.05)
+    (which-key-mode)
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; ENVIRONMENT VARIABLES
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package exec-path-from-shell
+    :ensure t
+    :if (and (display-graphic-p)
+        (eq system-type 'darwin))
+    :demand t
+    :config
+    (setq exec-path-from-shell-variables '("PATH"))
+    (exec-path-from-shell-initialize)
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; MULTIPLE CURSORS (MC)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package multiple-cursors :ensure t :defer t
+    :init (setq mc/list-file "~/.emacs.d/onemacs-cache/mc-lists.el"))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; MOVE TEXT
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package move-text
+    :ensure t
+    :config
+    ;; Function advice to have Emacs re-indent the text in-and-around a text move
+    (defun onncera-move-text-indent-region-advice (&rest _ignored)
+        (let ((deactivate deactivate-mark))
+            (if (region-active-p)
+                (indent-region (region-beginning) (region-end))
+                (indent-region (line-beginning-position) (line-end-position)))
+            (setq deactivate-mark deactivate)))
+    (advice-add 'move-text-up   :after #'onncera-move-text-indent-region-advice)
+    (advice-add 'move-text-down :after #'onncera-move-text-indent-region-advice)
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; UNDO / REDO
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package vundo   :ensure t :defer t)
+(use-package undo-fu :ensure t
+    :bind (
+    ("C-/" . undo-fu-only-undo)
+    ("C-?" . undo-fu-only-redo)
+    )
+)
+
+
+(use-package undo-fu-session
+    :ensure t
+    :init
+    (setq undo-fu-session-directory
+        (expand-file-name "onemacs-cache/undo-fu-session/" user-emacs-directory))
+    (setq undo-fu-session-incompatible-files '
+        ("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
+
+    :config
+    (undo-fu-session-global-mode)
+    )
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; ================================================================================
+;; @topic FUNCTIONS / VARIABLES - PART 2
+;; ================================================================================
+;; NOTE - part two because some functions should only be defined at later stages
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(defun onncera-vertico-find-file (candidates)
+"Sort CANDIDATES by dotfiles first, then dot-dirs, then files, then dirs (all in alphabetical order)"
+    ;; speed up file operations during sorting.. emacs has a ton of background checks. Turn them off
+    (let ((file-name-handler-alist nil))
+        (sort candidates
+        (lambda (a b)
+        (let* (
+            (a-dot (string-prefix-p "." a))  ;; checks if file "a" starts with a dot. If it does, true
+            (b-dot (string-prefix-p "." b))  ;; do the same for the below
+            (a-dir (string-suffix-p "/" a))  ;; so for any two items, emacs knows is it a dotfile or a dir
+            (b-dir (string-suffix-p "/" b))
+        )
+
+        (cond  ;; now we have our sorting rules
+        ;; rule 1 : place "." and ".." always stay at the very top
+        ((string-match-p "\\`\\.\\.?/\\'" a) t)
+        ((string-match-p "\\`\\.\\.?/\\'" b) nil)
+
+        ;; rule 2 : priortise dotfiles over regular files
+        ((and a-dot (not b-dot)) t)
+        ((and (not a-dot) b-dot) nil)
+
+
+        ;; rule 3 : Within dotfiles, prefer files over directories
+        ((and a-dot b-dot)
+            (if (and (not a-dir) b-dir) t
+                (if (and a-dir (not b-dir)) nil
+                    (string< a b))))
+
+        ;; rule 4 : Within regular files, prefer files over directories
+        (t
+            (if (and (not a-dir) b-dir) t
+                (if (and a-dir (not b-dir)) nil
+                    (string< a b))))))))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; ================================================================================
+;; @topic HOOKS
+;; ================================================================================
+(add-hook 'emacs-startup-hook #'split-window-horizontally)
+(add-hook 'emacs-startup-hook #'toggle-frame-fullscreen t)
+(add-hook 'prog-mode-hook #'onncera-highlight-todo)
+(add-hook 'prog-mode-hook #'onncera-set-up-whitespace-handling)
+
+;; the kill ring can accumulate text properties - fonts, overlays, etc
+;; that bloat the savehist file. doom emacs strips them before saving
+(add-hook 'savehist-save-hook
+    (lambda ()
+        (setq kill-ring
+            (mapcar #'substring-no-properties
+                (cl-remove-if-not #'stringp kill-ring)
+            )
+        )
+    )
+)
+
+;;;; imenu
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(add-hook
+    'emacs-lisp-mode-hook
+    (lambda ()
+        ;; Save the original index function installed by emacs-lisp-mode.
+        (setq-local onncera-original-imenu-create-index-function
+                    imenu-create-index-function)
+
+        ;; Replace it with our wrapper.
+        (setq-local imenu-create-index-function
+                    #'onncera-elisp-imenu-create-index)
+    )
+)
+
+(defun onncera-elisp-imenu-create-index ()
+    "extend the builtin emacs lisp imenu index with custom entries"
+    (let ((index (funcall onncera-original-imenu-create-index-function)))
+    (append index
+        (imenu--generic-function '(
+            ("checks" "^[^\n]*\\(?:@check\\|TODO\\)[[:space:]]+\\(.+\\)$" 1)
+            ("topics" "^[^\n]*@topic[[:space:]]+\\(.+\\)$" 1)
+        )
+        )
+    )
+    )
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; ================================================================================
+;; @topic KEYBINDINGS
+;; ================================================================================
+;; NOTE - builtin commands are bound directly
+;; NOTE - package-specific commands are wrapped in (with-eval-after-load 'package-feature ...)
+;;        to stay safe regardless of load order / deferred loading
+
+;; super cool and important commands/keybindings:
+;; > view-lossage            (C-h l)
+;; > view-echo-area-messages (C-h e)
+
+;;;; a-map
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(defvar onncera-a-map (make-sparse-keymap) "onncera C-c a prefix")
+(global-set-key (kbd "C-c a") onncera-a-map)
+(define-key onncera-a-map (kbd "t") #'onncera-ansi-term)
+
+;; example for non builtin commands
+;; b - (reserved, example only, uncomment + fill in when needed)
+;; (with-eval-after-load 'magit
+;;   (define-key onncera-a-map (kbd "b") #'magit-status))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; remaps
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(global-set-key [remap move-beginning-of-line] #'onncera-smart-beginning-of-line)
+(global-set-key [remap imenu] #'onncera-helm-imenu-right)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; reclaiming keys (unset)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; separated into blocks so we can visualise better
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(global-unset-key (kbd "C-0")) (global-unset-key (kbd "M-0")) (global-unset-key (kbd "C-M-0"))
+(global-unset-key (kbd "C-1")) (global-unset-key (kbd "M-1")) (global-unset-key (kbd "C-M-1"))
+(global-unset-key (kbd "C-2")) (global-unset-key (kbd "M-2")) (global-unset-key (kbd "C-M-2"))
+(global-unset-key (kbd "C-3")) (global-unset-key (kbd "M-3")) (global-unset-key (kbd "C-M-3"))
+(global-unset-key (kbd "C-4")) (global-unset-key (kbd "M-4")) (global-unset-key (kbd "C-M-4"))
+(global-unset-key (kbd "C-5")) (global-unset-key (kbd "M-5")) (global-unset-key (kbd "C-M-5"))
+(global-unset-key (kbd "C-6")) (global-unset-key (kbd "M-6")) (global-unset-key (kbd "C-M-6"))
+(global-unset-key (kbd "C-7")) (global-unset-key (kbd "M-7")) (global-unset-key (kbd "C-M-7"))
+(global-unset-key (kbd "C-8")) (global-unset-key (kbd "M-8")) (global-unset-key (kbd "C-M-8"))
+(global-unset-key (kbd "C-9")) (global-unset-key (kbd "M-9")) (global-unset-key (kbd "C-M-9"))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(global-unset-key (kbd "C-<end>"   )) (global-unset-key (kbd "M-<end>"   ))
+(global-unset-key (kbd "C-<prior>" )) (global-unset-key (kbd "M-<prior>" ))
+(global-unset-key (kbd "C-<help>"  )) (global-unset-key (kbd "M-<help>"  ))
+(global-unset-key (kbd "C-<home>"  )) (global-unset-key (kbd "M-<home>"  ))
+(global-unset-key (kbd "C-<next>"  )) (global-unset-key (kbd "M-<next>"  ))
+(global-unset-key (kbd "C-<delete>")) (global-unset-key (kbd "M-<delete>"))
+
+(global-unset-key (kbd "<end>"   ))      ;; this is the 'end'       key on my logitech keyboard
+(global-unset-key (kbd "<prior>" ))      ;; this is the 'page up'   key on my logitech keyboard
+(global-unset-key (kbd "<help>"  ))      ;; this is the 'insert'    key on my logitech keyboard
+(global-unset-key (kbd "<home>"  ))      ;; this is the 'home'      key on my logitech keyboard
+(global-unset-key (kbd "<next>"  ))      ;; this is the 'page down' key on my logitech keyboard
+(global-unset-key (kbd "<deletechar>"))  ;; this is the 'delete'    key on my logitech keyboard
+
+(global-unset-key (kbd "C-M-<end>"   ))
+(global-unset-key (kbd "C-M-<prior>" ))
+(global-unset-key (kbd "C-M-<help>"  ))
+(global-unset-key (kbd "C-M-<home>"  ))
+(global-unset-key (kbd "C-M-<next>"  ))
+(global-unset-key (kbd "C-M-<delete>"))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(global-unset-key (kbd "<f9>" )) (global-unset-key (kbd "C-M-<f9>" ))
+(global-unset-key (kbd "<f10>")) (global-unset-key (kbd "C-M-<f10>"))
+(global-unset-key (kbd "<f11>")) (global-unset-key (kbd "C-M-<f11>"))
+(global-unset-key (kbd "<f12>")) (global-unset-key (kbd "C-M-<f12>"))
+(global-unset-key (kbd "<f13>")) (global-unset-key (kbd "C-M-<f13>"))
+(global-unset-key (kbd "<f14>")) (global-unset-key (kbd "C-M-<f14>"))
+(global-unset-key (kbd "<f15>")) (global-unset-key (kbd "C-M-<f15>"))
+
+(global-unset-key (kbd "C-<f9>" )) (global-unset-key (kbd "S-<f9>" )) (global-unset-key (kbd "M-<f9>" ))
+(global-unset-key (kbd "C-<f10>")) (global-unset-key (kbd "S-<f10>")) (global-unset-key (kbd "M-<f10>"))
+(global-unset-key (kbd "C-<f11>")) (global-unset-key (kbd "S-<f11>")) (global-unset-key (kbd "M-<f11>"))
+(global-unset-key (kbd "C-<f12>")) (global-unset-key (kbd "S-<f12>")) (global-unset-key (kbd "M-<f12>"))
+(global-unset-key (kbd "C-<f13>")) (global-unset-key (kbd "S-<f13>")) (global-unset-key (kbd "M-<f13>"))
+(global-unset-key (kbd "C-<f14>")) (global-unset-key (kbd "S-<f14>")) (global-unset-key (kbd "M-<f14>"))
+(global-unset-key (kbd "C-<f15>")) (global-unset-key (kbd "S-<f15>")) (global-unset-key (kbd "M-<f15>"))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; separated into blocks so we can visualise better
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; navigation
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; TODO - place this in bashrc (alias emacs="/Applications/Emacs.app/Contents/MacOS/Emacs")
+;; so that when we want to have a look at what vanilla
+;; emacs original keybindings are , you can just run "emacs -Q" in the terminal
+
+;; ORDER
+;; - move-text
+;; - expand-region
+;; - edited last & mark ring navigation
+;; - avy
+;; - Jumping by function
+;; - sexp - balanced expression
+;; - xref
+;; - multiple-cursors
+;; - version control - programming navigation workflow
+;; - embark
+
+(global-set-key (kbd "<prior>")      'move-text-up)
+(global-set-key (kbd "<next>")       'move-text-down)
+(global-set-key (kbd "<home>")       'er/expand-region)
+(global-set-key (kbd "<end>")        'er/contract-region)
+(global-set-key (kbd "<help>")       'goto-last-change)       ;; An Emacs package to move point through buffer-undo-list positions
+(global-set-key (kbd "<deletechar>") 'pop-to-mark-command)    ;; pop back through recent cursor positions in the current buffer
+
+(setq avy-timeout-seconds 1.0)
+(global-set-key (kbd "C-0")   'avy-goto-char-timer)           ;; input an arbitrary amount of consecutive chars
+(global-set-key (kbd "M-0")   'avy-goto-char)                 ;; input one char , jump to it with a tree
+(global-set-key (kbd "C-M-0") 'avy-goto-line)                 ;; input zero chars , jump to a line start with a tree
+(global-set-key (kbd "C-1")   'end-of-defun)
+(global-set-key (kbd "C-2")   'beginning-of-defun)
+(global-set-key (kbd "C-3")   'mark-defun)
+(global-set-key (kbd "C-4")   'backward-sexp)
+(global-set-key (kbd "C-5")   'forward-sexp)
+(global-set-key (kbd "C-6")   'mark-sexp)
+(global-set-key (kbd "C-7")   'xref-go-back)
+(global-set-key (kbd "C-8")   'xref-find-definitions)
+(global-set-key (kbd "C-9")   'xref-find-references)
+
+(global-set-key (kbd "<f9>")  'javelin-go-or-assign-to-1)
+(global-set-key (kbd "<f10>") 'javelin-go-or-assign-to-2)
+(global-set-key (kbd "<f11>") 'javelin-go-or-assign-to-3)
+(global-set-key (kbd "<f12>") 'javelin-go-or-assign-to-4)
+(global-set-key (kbd "<f13>") 'javelin-delete)  ;; delete a specific position for the current project/branch
+(global-set-key (kbd "<f14>") 'javelin-clear)   ;; delete all positions for current project/branch
+(global-set-key (kbd "<f15>") 'javelin-toggle-quick-menu)
+
+(global-set-key (kbd "C-<f9>")  'mc/mark-next-like-this)        ;; NOTE - need to select a region
+(global-set-key (kbd "C-<f10>") 'mc/mark-previous-like-this)    ;; NOTE - need to select a region
+(global-set-key (kbd "C-<f11>") 'mc/mark-next-like-this)
+(global-set-key (kbd "C-<f12>") 'mc/mark-previous-like-this)
+(global-set-key (kbd "C-<f13>") 'mc/mark-all-symbols-like-this-in-defun)
+(global-set-key (kbd "C-<f14>") 'mc/vertical-align-with-space)  ;; NOTE - select a region & add MCs with 'edit-lines' , then move to the end of the line and run this command
+(global-set-key (kbd "C-<f15>") 'mc/edit-lines)
+
+(global-set-key (kbd "M-<f9>")  'git-gutter:next-hunk)
+(global-set-key (kbd "M-<f10>") 'git-gutter:previous-hunk)
+(global-set-key (kbd "M-<f11>") 'git-gutter:popup-hunk)
+(global-set-key (kbd "M-<f12>") 'magit-log-buffer-file)
+
+(global-set-key (kbd "C-,") 'embark-act)
+(global-set-key (kbd "C-.") 'embark-dwim)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; ================================================================================
+;; @topic TESTING PLAYGROUND
+;; ================================================================================
+
+;; NOTE - packages to explore more:
+;; > Javelin
+;; > yuta   (https://github.com/zenitsu7772000/yuta.el)
+
+;;;; COLORFUL MODE
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package colorful-mode :ensure t
+    :hook
+    (prog-mode . colorful-mode)
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; ISEARCH
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; taken from prot (https://protesilaos.com/codelog/2026-04-30-emacs-decent-default-sacha-chua/)
+(use-package isearch
+    :config
+    (setq search-whitespace-regexp ".*?")
+    (setq isearch-lax-whitespace t)
+    (setq isearch-regexp-lax-whitespace nil)
+    (setq isearch-lazy-count t)
+    (setq lazy-count-prefix-format "(%s/%s) ")
+    (setq lazy-count-suffix-format nil)
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; DIRED
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; taken from prot (https://protesilaos.com/codelog/2026-04-30-emacs-decent-default-sacha-chua/)
+(use-package dired
+    :config
+    (setq delete-by-moving-to-trash t)
+    (setq dired-create-destination-dirs 'ask)
+    (setq dired-create-destination-dirs-on-trailing-dirsep t)  ;; emacs 29
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; EDIFF
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; taken from prot (https://protesilaos.com/codelog/2026-04-30-emacs-decent-default-sacha-chua/)
+(use-package ediff
+    :config
+    (setq ediff-split-window-function 'split-window-horizontally)
+    (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
