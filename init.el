@@ -439,8 +439,6 @@
 ;; @topic CONVENIENCE
 ;; ==============================================================================================================
 
-
-
 ;; @subtopic-1 AMALGAMATION
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; NOTE - give packages their own section if they require configuration
@@ -450,55 +448,190 @@
 (use-package goto-last-change :ensure t :defer t)
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; @subtopic-1 JAVELIN
+;; @subtopic-1 HARPOON
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package javelin
     :ensure t
     :config
     (global-javelin-minor-mode 1)
-    (setq javelin-minor-mode-map (make-sparse-keymap))  ;; wipe all default bindings
+    (setq javelin-minor-mode-map
+        (make-sparse-keymap)
+    )
 )
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; @subtopic-1 DISABLE MOUSE (INHIBIT)
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package inhibit-mouse
+;; @subtopic-1 MULTIPLE CURSORS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package multiple-cursors :ensure t :defer t
+    :init (setq mc/list-file "~/.emacs.d/onemacs-cache/mc-lists.el"))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic-1 MOVE TEXT
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package move-text
     :ensure t
     :config
-    (setq inhibit-mouse-excluded-modes '(pdf-view-mode devdocs-mode))  ;; can use mouse in these modes
-    (inhibit-mouse-mode 1)
+    ;; Function advice to have Emacs re-indent the text in-and-around a text move
+    (defun onncera-move-text-indent-region-advice (&rest _ignored)
+        (let ((deactivate deactivate-mark))
+            (if (region-active-p)
+                (indent-region (region-beginning) (region-end))
+                (indent-region (line-beginning-position) (line-end-position)))
+            (setq deactivate-mark deactivate)))
+    (advice-add 'move-text-up   :after #'onncera-move-text-indent-region-advice)
+    (advice-add 'move-text-down :after #'onncera-move-text-indent-region-advice)
 )
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; @subtopic-1 KEYCAST
+;; @subtopic-1 UNDO / REDO
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package vundo   :ensure t :defer t)
+(use-package undo-fu :ensure t
+    :bind (
+    ("C-/" . undo-fu-only-undo)
+    ("C-?" . undo-fu-only-redo)
+    )
+)
+
+
+(use-package undo-fu-session
+    :ensure t
+    :init
+    (setq undo-fu-session-directory
+        (expand-file-name "onemacs-cache/undo-fu-session/" user-emacs-directory))
+    (setq undo-fu-session-incompatible-files '
+        ("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
+
+    :config
+    (undo-fu-session-global-mode)
+    )
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic-1 SET & FORGET
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package keycast :ensure t
+;; NOTE - these packages are super unlikely to change settings
+(use-package exec-path-from-shell
+    :ensure t
+    :if (and (display-graphic-p)
+        (eq system-type 'darwin))
+    :demand t
+    :config
+    (setq exec-path-from-shell-variables '("PATH"))
+    (exec-path-from-shell-initialize))
+
+(use-package inhibit-mouse :ensure t :defer t
+    :config
+    (setq inhibit-mouse-excluded-modes '(pdf-view-mode devdocs-mode))  ;; can use mouse in these modes
+    (inhibit-mouse-mode 1))
+
+(use-package keycast       :ensure t :defer t
     :config
     (keycast-tab-bar-mode)
     (setq keycast-window-predicate #'always)
-    (setq keycast-substitute-alist '())
-)
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    (setq keycast-substitute-alist '()))
 
-;; @subtopic-1 WHICH-KEY
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package which-key
+(use-package which-key               :defer t
     :config
     (setq which-key-show-early-on-C-h t)
     (setq which-key-idle-delay 1e6)
     (setq which-key-idle-secondary-delay 0.05)
-    (which-key-mode)
-)
+    (which-key-mode))
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+;; ==============================================================================================================
+;; @topic FUNCTIONS / VARIABLES - PART 2
+;; ==============================================================================================================
+;; NOTE - Functions / Variables that need to be defined at a later stage
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(defun onncera-vertico-find-file (candidates)
+"Sort CANDIDATES by dotfiles first, then dot-dirs, then files, then dirs (all in alphabetical order)"
+    ;; speed up file operations during sorting.. emacs has a ton of background checks. Turn them off
+    (let ((file-name-handler-alist nil))
+        (sort candidates
+        (lambda (a b)
+        (let* (
+            (a-dot (string-prefix-p "." a))  ;; checks if file "a" starts with a dot. If it does, true
+            (b-dot (string-prefix-p "." b))  ;; do the same for the below
+            (a-dir (string-suffix-p "/" a))  ;; so for any two items, emacs knows is it a dotfile or a dir
+            (b-dir (string-suffix-p "/" b))
+        )
+
+        (cond  ;; now we have our sorting rules
+        ;; rule 1 : place "." and ".." always stay at the very top
+        ((string-match-p "\\`\\.\\.?/\\'" a) t)
+        ((string-match-p "\\`\\.\\.?/\\'" b) nil)
+
+        ;; rule 2 : priortise dotfiles over regular files
+        ((and a-dot (not b-dot)) t)
+        ((and (not a-dot) b-dot) nil)
 
 
+        ;; rule 3 : Within dotfiles, prefer files over directories
+        ((and a-dot b-dot)
+            (if (and (not a-dir) b-dir) t
+                (if (and a-dir (not b-dir)) nil
+                    (string< a b))))
+
+        ;; rule 4 : Within regular files, prefer files over directories
+        (t
+            (if (and (not a-dir) b-dir) t
+                (if (and a-dir (not b-dir)) nil
+                    (string< a b))))))))))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+;; ==============================================================================================================
+;; @topic HOOKS
+;; ==============================================================================================================
+(add-hook 'emacs-startup-hook #'split-window-horizontally)
+(add-hook 'emacs-startup-hook #'toggle-frame-fullscreen t)
+(add-hook 'prog-mode-hook #'onncera-highlight-todo)
+(add-hook 'prog-mode-hook #'onncera-set-up-whitespace-handling)
 
+;; the kill ring can accumulate text properties - fonts, overlays, etc
+;; that bloat the savehist file. doom emacs strips them before saving
+(add-hook 'savehist-save-hook
+    (lambda ()
+        (setq kill-ring
+            (mapcar #'substring-no-properties
+                (cl-remove-if-not #'stringp kill-ring)
+            )
+        )
+    )
+)
 
+;; @subtopic-1 imenu
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(add-hook
+    'emacs-lisp-mode-hook
+    (lambda ()
+        ;; Save the original index function installed by emacs-lisp-mode.
+        (setq-local onncera-original-imenu-create-index-function
+                    imenu-create-index-function)
 
+        ;; Replace it with our wrapper.
+        (setq-local imenu-create-index-function
+                    #'onncera-elisp-imenu-create-index)
+    )
+)
+
+(defun onncera-elisp-imenu-create-index ()
+    "extend the builtin emacs lisp imenu index with custom entries"
+    (let ((index (funcall onncera-original-imenu-create-index-function)))
+    (append index
+        (imenu--generic-function '(
+            ("checks" "^[^\n]*\\(?:@check\\|TODO\\)[[:space:]]+\\(.+\\)$" 1)
+            ("topics" "^[^\n]*@topic[[:space:]]+\\(.+\\)$" 1)
+        )
+        )
+    )
+    )
+)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 
