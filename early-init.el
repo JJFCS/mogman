@@ -1,6 +1,12 @@
 ;; -*- lexical-binding: t; -*-
 
-;; taken from kickstart.emacs
+;; garbage collection
+(setq gc-cons-threshold most-positive-fixnum)
+(setq gc-cons-percentage 0.6)
+
+;; emacs recomputes font caches far more than it needs to
+;; this helps a lot with nerd font or ligature-heavy configurations
+(setq inhibit-compacting-font-caches t)
 
 ;; disable UI elements before UI initialization
 (setq menu-bar-mode nil)  ;; disable the menu bar
