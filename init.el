@@ -259,9 +259,10 @@
     (vertico-multiform-mode)
     (setq vertico-multiform-categories '((file (vertico-sort-function . onncera-vertico-find-file))))
     (setq vertico-multiform-commands '(
-        (consult-find buffer)
-        (consult-grep buffer)
-        (consult-line buffer)
+        (consult-imenu buffer)
+        (consult-find  buffer)
+        (consult-grep  buffer)
+        (consult-line  buffer)
         )
     )
 )
@@ -518,18 +519,17 @@
     :config
     (setq exec-path-from-shell-variables '("PATH"))
     (exec-path-from-shell-initialize))
-
 (use-package inhibit-mouse :ensure t :defer t
     :config
     (setq inhibit-mouse-excluded-modes '(pdf-view-mode devdocs-mode))  ;; can use mouse in these modes
     (inhibit-mouse-mode 1))
 
+(use-package colorful-mode :ensure t :hook (prog-mode . colorful-mode))
 (use-package keycast       :ensure t :defer t
     :config
     (keycast-tab-bar-mode)
-    (setq keycast-window-predicate #'always)
+    (setq keycast-window-predicate 'always)
     (setq keycast-substitute-alist '()))
-
 (use-package which-key               :defer t
     :config
     (setq which-key-show-early-on-C-h t)
@@ -634,15 +634,196 @@
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+;; ==============================================================================================================
+;; @topic KEYBINDINGS
+;; ==============================================================================================================
+;; super cool and important commands/keybindings:
+;; > view-lossage            (C-h l)
+;; > view-echo-area-messages (C-h e)
+
+;; @subtopic-1 a-map
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(defvar onncera-a-map (make-sparse-keymap) "onncera C-c a prefix")
+(global-set-key (kbd "C-c a") onncera-a-map)
+(define-key onncera-a-map (kbd "t") #'onncera-ansi-term)
+
+;; example for non builtin commands
+;; b - (reserved, example only, uncomment + fill in when needed)
+;; (with-eval-after-load 'magit
+;;   (define-key onncera-a-map (kbd "b") #'magit-status))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic-1 remaps
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(global-set-key [remap move-beginning-of-line] #'onncera-smart-beginning-of-line)
+(global-set-key [remap imenu] #'consult-imenu)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic-1 reclaiming keys (unset)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; separated into blocks so we can visualise better
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(global-unset-key (kbd "C-0")) (global-unset-key (kbd "M-0")) (global-unset-key (kbd "C-M-0"))
+(global-unset-key (kbd "C-1")) (global-unset-key (kbd "M-1")) (global-unset-key (kbd "C-M-1"))
+(global-unset-key (kbd "C-2")) (global-unset-key (kbd "M-2")) (global-unset-key (kbd "C-M-2"))
+(global-unset-key (kbd "C-3")) (global-unset-key (kbd "M-3")) (global-unset-key (kbd "C-M-3"))
+(global-unset-key (kbd "C-4")) (global-unset-key (kbd "M-4")) (global-unset-key (kbd "C-M-4"))
+(global-unset-key (kbd "C-5")) (global-unset-key (kbd "M-5")) (global-unset-key (kbd "C-M-5"))
+(global-unset-key (kbd "C-6")) (global-unset-key (kbd "M-6")) (global-unset-key (kbd "C-M-6"))
+(global-unset-key (kbd "C-7")) (global-unset-key (kbd "M-7")) (global-unset-key (kbd "C-M-7"))
+(global-unset-key (kbd "C-8")) (global-unset-key (kbd "M-8")) (global-unset-key (kbd "C-M-8"))
+(global-unset-key (kbd "C-9")) (global-unset-key (kbd "M-9")) (global-unset-key (kbd "C-M-9"))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(global-unset-key (kbd "C-<end>"   )) (global-unset-key (kbd "M-<end>"   ))
+(global-unset-key (kbd "C-<prior>" )) (global-unset-key (kbd "M-<prior>" ))
+(global-unset-key (kbd "C-<help>"  )) (global-unset-key (kbd "M-<help>"  ))
+(global-unset-key (kbd "C-<home>"  )) (global-unset-key (kbd "M-<home>"  ))
+(global-unset-key (kbd "C-<next>"  )) (global-unset-key (kbd "M-<next>"  ))
+(global-unset-key (kbd "C-<delete>")) (global-unset-key (kbd "M-<delete>"))
+
+(global-unset-key (kbd "<end>"   ))      ;; this is the 'end'       key on my logitech keyboard
+(global-unset-key (kbd "<prior>" ))      ;; this is the 'page up'   key on my logitech keyboard
+(global-unset-key (kbd "<help>"  ))      ;; this is the 'insert'    key on my logitech keyboard
+(global-unset-key (kbd "<home>"  ))      ;; this is the 'home'      key on my logitech keyboard
+(global-unset-key (kbd "<next>"  ))      ;; this is the 'page down' key on my logitech keyboard
+(global-unset-key (kbd "<deletechar>"))  ;; this is the 'delete'    key on my logitech keyboard
+
+(global-unset-key (kbd "C-M-<end>"   ))
+(global-unset-key (kbd "C-M-<prior>" ))
+(global-unset-key (kbd "C-M-<help>"  ))
+(global-unset-key (kbd "C-M-<home>"  ))
+(global-unset-key (kbd "C-M-<next>"  ))
+(global-unset-key (kbd "C-M-<delete>"))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(global-unset-key (kbd "<f9>" )) (global-unset-key (kbd "C-M-<f9>" ))
+(global-unset-key (kbd "<f10>")) (global-unset-key (kbd "C-M-<f10>"))
+(global-unset-key (kbd "<f11>")) (global-unset-key (kbd "C-M-<f11>"))
+(global-unset-key (kbd "<f12>")) (global-unset-key (kbd "C-M-<f12>"))
+(global-unset-key (kbd "<f13>")) (global-unset-key (kbd "C-M-<f13>"))
+(global-unset-key (kbd "<f14>")) (global-unset-key (kbd "C-M-<f14>"))
+(global-unset-key (kbd "<f15>")) (global-unset-key (kbd "C-M-<f15>"))
+
+(global-unset-key (kbd "C-<f9>" )) (global-unset-key (kbd "S-<f9>" )) (global-unset-key (kbd "M-<f9>" ))
+(global-unset-key (kbd "C-<f10>")) (global-unset-key (kbd "S-<f10>")) (global-unset-key (kbd "M-<f10>"))
+(global-unset-key (kbd "C-<f11>")) (global-unset-key (kbd "S-<f11>")) (global-unset-key (kbd "M-<f11>"))
+(global-unset-key (kbd "C-<f12>")) (global-unset-key (kbd "S-<f12>")) (global-unset-key (kbd "M-<f12>"))
+(global-unset-key (kbd "C-<f13>")) (global-unset-key (kbd "S-<f13>")) (global-unset-key (kbd "M-<f13>"))
+(global-unset-key (kbd "C-<f14>")) (global-unset-key (kbd "S-<f14>")) (global-unset-key (kbd "M-<f14>"))
+(global-unset-key (kbd "C-<f15>")) (global-unset-key (kbd "S-<f15>")) (global-unset-key (kbd "M-<f15>"))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; separated into blocks so we can visualise better
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic-1 navigation
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; TODO - place this in bashrc (alias emacs="/Applications/Emacs.app/Contents/MacOS/Emacs")
+;; so that when we want to have a look at what vanilla
+;; emacs original keybindings are , you can just run "emacs -Q" in the terminal
+
+;; ORDER
+;; - move-text
+;; - expand-region
+;; - edited last & mark ring navigation
+;; - avy
+;; - Jumping by function
+;; - sexp - balanced expression
+;; - xref
+;; - multiple-cursors
+;; - version control - programming navigation workflow
+;; - embark
+
+(global-set-key (kbd "<prior>")      'move-text-up)
+(global-set-key (kbd "<next>")       'move-text-down)
+(global-set-key (kbd "<home>")       'er/expand-region)
+(global-set-key (kbd "<end>")        'er/contract-region)
+(global-set-key (kbd "<help>")       'goto-last-change)              ;; An Emacs package to move point through buffer-undo-list positions
+(global-set-key (kbd "<deletechar>") 'pop-to-mark-command)           ;; pop back through recent cursor positions in the current buffer
+
+(setq avy-timeout-seconds 1.0)
+(global-set-key (kbd "C-0")          'avy-goto-char-timer)           ;; input an arbitrary amount of consecutive chars
+(global-set-key (kbd "M-0")          'avy-goto-char)                 ;; input one char , jump to it with a tree
+(global-set-key (kbd "C-M-0")        'avy-goto-line)                 ;; input zero chars , jump to a line start with a tree
+(global-set-key (kbd "C-1")          'end-of-defun)
+(global-set-key (kbd "C-2")          'beginning-of-defun)
+(global-set-key (kbd "C-3")          'mark-defun)
+(global-set-key (kbd "C-4")          'backward-sexp)
+(global-set-key (kbd "C-5")          'forward-sexp)
+(global-set-key (kbd "C-6")          'mark-sexp)
+(global-set-key (kbd "C-7")          'xref-go-back)
+(global-set-key (kbd "C-8")          'xref-find-definitions)
+(global-set-key (kbd "C-9")          'xref-find-references)
+
+(global-set-key (kbd "<f9>")         'javelin-go-or-assign-to-1)
+(global-set-key (kbd "<f10>")        'javelin-go-or-assign-to-2)
+(global-set-key (kbd "<f11>")        'javelin-go-or-assign-to-3)
+(global-set-key (kbd "<f12>")        'javelin-go-or-assign-to-4)
+(global-set-key (kbd "<f13>")        'javelin-delete)                ;; delete a specific position for the current project/branch
+(global-set-key (kbd "<f14>")        'javelin-clear)                 ;; delete all positions for current project/branch
+(global-set-key (kbd "<f15>")        'javelin-toggle-quick-menu)
+
+(global-set-key (kbd "C-<f9>")       'mc/mark-next-like-this)        ;; NOTE - need to select a region
+(global-set-key (kbd "C-<f10>")      'mc/mark-previous-like-this)    ;; NOTE - need to select a region
+(global-set-key (kbd "C-<f11>")      'mc/mark-next-like-this)
+(global-set-key (kbd "C-<f12>")      'mc/mark-previous-like-this)
+(global-set-key (kbd "C-<f13>")      'mc/mark-all-symbols-like-this-in-defun)
+(global-set-key (kbd "C-<f14>")      'mc/vertical-align-with-space)  ;; NOTE - select a region & add MCs with 'edit-lines' , then move to the end of the line and run this command
+(global-set-key (kbd "C-<f15>")      'mc/edit-lines)
+
+(global-set-key (kbd "M-<f9>")       'git-gutter:next-hunk)
+(global-set-key (kbd "M-<f10>")      'git-gutter:previous-hunk)
+(global-set-key (kbd "M-<f11>")      'git-gutter:popup-hunk)
+(global-set-key (kbd "M-<f12>")      'magit-log-buffer-file)
+
+(global-set-key (kbd "C-,")          'embark-act)
+(global-set-key (kbd "C-.")          'embark-dwim)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+;; ==============================================================================================================
+;; @topic TESTING PLAYGROUND
+;; ==============================================================================================================
+;; NOTE - packages to explore more:
+;; > yuta   (https://github.com/zenitsu7772000/yuta.el)
 
+;; @subtopic-1 ISEARCH
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; taken from prot (https://protesilaos.com/codelog/2026-04-30-emacs-decent-default-sacha-chua/)
+(use-package isearch
+    :config
+    (setq search-whitespace-regexp ".*?")
+    (setq isearch-lax-whitespace t)
+    (setq isearch-regexp-lax-whitespace nil)
+    (setq isearch-lazy-count t)
+    (setq lazy-count-prefix-format "(%s/%s) ")
+    (setq lazy-count-suffix-format nil)
+)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; @subtopic-1 DIRED
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; taken from prot (https://protesilaos.com/codelog/2026-04-30-emacs-decent-default-sacha-chua/)
+(use-package dired
+    :config
+    (setq delete-by-moving-to-trash t)
+    (setq dired-create-destination-dirs 'ask)
+    (setq dired-create-destination-dirs-on-trailing-dirsep t)  ;; emacs 29
+)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-
-
-
-
-
+;; @subtopic-1 EDIFF
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; taken from prot (https://protesilaos.com/codelog/2026-04-30-emacs-decent-default-sacha-chua/)
+(use-package ediff
+    :config
+    (setq ediff-split-window-function 'split-window-horizontally)
+    (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
