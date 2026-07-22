@@ -400,6 +400,216 @@
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+;; ==============================================================================================================
+;; @topic PROGRAMMING
+;; ==============================================================================================================
+
+;; @subtopic-1 TABS / INDENTS / SPACES / WHITESPACES / ETC
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq whitespace-style
+    '(face indentation newline tabs tab-mark trailing
+        spaces
+        space-before-tab
+        space-after-tab
+        space-mark
+    )
+)
+
+;; reads a .editorconfig file from project root to apply formatting preferences
+;; such as spaces vs tabs, indentation width, whitespace rules, etc.
+;; It does not control emacs indentation behavior or TAB/RET key actions
+(editorconfig-mode 1)
+(electric-indent-mode 0)
+
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 4)
+
+(setq-default c-basic-offset 4)
+(setq-default c-ts-mode-indent-offset 4)
+(setq-default python-indent-offset 4)
+(setq python-indent-guess-indent-offset nil)  ;; because we are using editorconfig-mode
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic-1 GIT / VC / MAGIT / ETC
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package git-gutter :ensure t :hook (prog-mode . git-gutter-mode))
+(use-package magit      :ensure t :defer t)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic-1 EGLOT
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+;; TODO - not happy with LSP setup - do asap!
+(setq read-process-output-max
+    (* 1024 1024))
+(setq process-adaptive-read-buffering nil)
+
+(use-package eglot
+    :hook
+    (
+        (python-mode . eglot-ensure)
+        (c-mode      . eglot-ensure)
+    )
+
+    :config
+    (setq eglot-ignored-server-capabilities '(:inlayHintProvider))
+    (setq eglot-autoshutdown t)        ;; close the server when the last buffer closes
+    (setq eglot-events-buffer-size 0)  ;; don't keep an ever-growing log of every LSP message
+    (setq eglot-sync-connect nil)      ;; don't block Emacs while the LSP server starts up
+
+    (add-to-list 'eglot-server-programs
+                 '(python-mode . ("basedpyright-langserver" "--stdio")
+    )
+    )
+
+    (add-to-list 'eglot-server-programs
+                 '(c-mode      . ("clangd")
+    )
+    )
+)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; ==============================================================================================================
+;; @topic CONVENIENCE
+;; ==============================================================================================================
+
+;; @subtopic-1 AMALGAMATION
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; NOTE - give packages their own section if they require configuration
+;; TODO - may be some of these can defer
+(use-package avy              :ensure t)
+(use-package casual           :ensure t)
+(use-package expand-region    :ensure t)
+(use-package goto-last-change :ensure t)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic-1 HARPOON
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package javelin
+    :ensure t
+    :config (global-javelin-minor-mode) (setq javelin-minor-mode-map
+                                            (make-sparse-keymap))  ;; remove all default keybindings
+    )
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic-1 MULTIPLE CURSORS
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package multiple-cursors :ensure t :defer t
+    :init (setq mc/list-file "~/.emacs.d/onemacs-cache/mc-lists.el"))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic-1 MOVE TEXT
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; TODO - may be can defer
+(use-package move-text
+    :ensure t
+    :config
+    ;; Function advice to have Emacs re-indent the text in-and-around a text move
+    (defun onncera-move-text-indent-region-advice (&rest _ignored)
+        (let ((deactivate deactivate-mark))
+            (if (region-active-p)
+                (indent-region (region-beginning) (region-end))
+                (indent-region (line-beginning-position) (line-end-position)))
+            (setq deactivate-mark deactivate)))
+    (advice-add 'move-text-up   :after #'onncera-move-text-indent-region-advice)
+    (advice-add 'move-text-down :after #'onncera-move-text-indent-region-advice)
+)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic-1 UNDO / REDO
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package vundo   :ensure t :defer t)
+(use-package undo-fu :ensure t
+    :bind (
+    ("C-/" . undo-fu-only-undo)
+    ("C-?" . undo-fu-only-redo)
+    )
+)
+
+
+(use-package undo-fu-session
+    :ensure t
+    :init
+    (setq undo-fu-session-directory
+        (expand-file-name "onemacs-cache/undo-fu-session/" user-emacs-directory))
+    (setq undo-fu-session-incompatible-files '
+        ("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
+
+    :config
+    (undo-fu-session-global-mode)
+    )
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic-1 SET & FORGET
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; NOTE - you can exclude certain modes by using "setq inhibit-mouse-excluded-modes"
+(use-package inhibit-mouse :ensure t :config (inhibit-mouse-mode))
+(use-package colorful-mode :ensure t :hook (prog-mode . colorful-mode))
+
+(use-package exec-path-from-shell
+    :ensure t
+    :if (and (display-graphic-p) (eq system-type 'darwin))
+    :config (exec-path-from-shell-initialize))
+
+(use-package keycast
+    :ensure t
+    :config
+    (keycast-tab-bar-mode)
+    (setq keycast-window-predicate 'always)
+    (setq keycast-substitute-alist '()))
+
+(use-package which-key
+    :config
+    (setq which-key-show-early-on-C-h t)
+    (setq which-key-idle-delay 1e6)
+    (setq which-key-idle-secondary-delay 0.05)
+    (which-key-mode))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; ==============================================================================================================
+;; @topic FUNCTIONS / VARIABLES - PART 2
+;; ==============================================================================================================
+;; NOTE - Functions / Variables that need to be defined at a later stage
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(defun onncera-vertico-find-file (candidates)
+"Sort CANDIDATES by dotfiles first, then dot-dirs, then files, then dirs (all in alphabetical order)"
+    ;; speed up file operations during sorting.. emacs has a ton of background checks. Turn them off
+    (let ((file-name-handler-alist nil))
+        (sort candidates
+        (lambda (a b)
+        (let* (
+            (a-dot (string-prefix-p "." a))  ;; checks if file "a" starts with a dot. If it does, true
+            (b-dot (string-prefix-p "." b))  ;; do the same for the below
+            (a-dir (string-suffix-p "/" a))  ;; so for any two items, emacs knows is it a dotfile or a dir
+            (b-dir (string-suffix-p "/" b))
+        )
+
+        (cond  ;; now we have our sorting rules
+        ;; rule 1 : place "." and ".." always stay at the very top
+        ((string-match-p "\\`\\.\\.?/\\'" a) t)
+        ((string-match-p "\\`\\.\\.?/\\'" b) nil)
+
+        ;; rule 2 : priortise dotfiles over regular files
+        ((and a-dot (not b-dot)) t)
+        ((and (not a-dot) b-dot) nil)
+
+
+        ;; rule 3 : Within dotfiles, prefer files over directories
+        ((and a-dot b-dot)
+            (if (and (not a-dir) b-dir) t
+                (if (and a-dir (not b-dir)) nil
+                    (string< a b))))
+
+        ;; rule 4 : Within regular files, prefer files over directories
+        (t
+            (if (and (not a-dir) b-dir) t
+                (if (and a-dir (not b-dir)) nil
+                    (string< a b))))))))))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 
