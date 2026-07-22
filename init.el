@@ -222,6 +222,7 @@
 (use-package vscode-dark-plus-theme
     :ensure t
     :config
+    (require 'color)
     (require 'whitespace)
 
     (defun onncera-vscode-dark-plus-whitespace-faces (theme)
@@ -658,8 +659,9 @@
     (let ((index (funcall onncera-original-imenu-create-index-function)))
     (append index
         (imenu--generic-function '(
-            ("checks" "^[^\n]*\\(?:@check\\|TODO\\)[[:space:]]+\\(.+\\)$" 1)
-            ("topics" "^[^\n]*@topic[[:space:]]+\\(.+\\)$" 1)
+            ("checks"     "^[^\n]*\\(?:@check\\|TODO\\)[[:space:]]+\\(.+\\)$" 1)
+            ("topics"     "^[^\n]*@topic[[:space:]]+\\(.+\\)$" 1)
+            ("subtopic 1" "^[^\n]*@subtopic-1[[:space:]]+\\(.+\\)$" 1)
         )
         )
     )
