@@ -151,6 +151,7 @@
 (defun onncera-helm-imenu-right ()
     "run helm-imenu with the Helm window on the right"
     (interactive)
+    (defvar helm-split-window-default-side)
     (let ((helm-split-window-default-side 'right))
     (helm-imenu)
     )
@@ -495,9 +496,9 @@
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package javelin
     :ensure t
-    :config (global-javelin-minor-mode) (setq javelin-minor-mode-map
-                                            (make-sparse-keymap))  ;; remove all default keybindings
-    )
+    :config
+    (setcdr javelin-minor-mode-map nil)  ;; remove all default keybindings
+    (global-javelin-minor-mode))
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic-1 MULTIPLE CURSORS
