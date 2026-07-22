@@ -218,40 +218,45 @@
     (onemacs-apply-fonts)
 )
 
-;; @check TODO - done by AI (TOP PRIORITY)
-;; plug into claude and check if anything can be improved and work on whitespace colors (errors)
+;; @check TODO - done by AI
 (use-package vscode-dark-plus-theme
     :ensure t
     :config
-    (onemacs-load-theme 'vscode-dark-plus)  ;; Load theme & reapply fonts in one shot
+    (require 'whitespace)
 
-    ;; configuring subtle vs error whitespace faces
-    (let* ((bg (face-attribute 'default :background))
-              (subtle (color-lighten-name bg 40)))  ;; higher number == more visible - vice versa
+    (defun onncera-vscode-dark-plus-whitespace-faces (theme)
+        "apply subtle/error whitespace faces but only for vscode-dark-plus"
+        (when (eq theme 'vscode-dark-plus)
+            (let* ((bg (face-attribute 'default :background))
+                      (subtle (color-lighten-name bg 40))  ;; higher number == more visible - vice versa
+                      (warn-color (face-attribute 'error :foreground)))
 
-        ;; Normal visible whitespace (subtle)
-        (dolist (face '(
-                           whitespace-space
-                           whitespace-hspace
-                           whitespace-newline
-                           whitespace-tab))
-            (set-face-attribute face nil
-                :foreground subtle
-                :background 'unspecified
-                :weight     'normal))
+                ;; normal visible whitespace (subtle)
+                (dolist (face '(
+                                   whitespace-space
+                                   whitespace-hspace
+                                   whitespace-newline
+                                   whitespace-tab))
+                    (set-face-attribute face nil
+                        :foreground subtle
+                        :background 'unspecified
+                        :weight     'normal))
 
-        ;; WHITESPACE ERRORS
-        (dolist (face '(
-                           whitespace-trailing
-                           whitespace-indentation
-                           whitespace-space-before-tab
-                           whitespace-space-after-tab
-                           whitespace-empty))
-            (set-face-attribute face nil
-                :background "#C0392B"
-                :foreground "#C0392B"
-                :weight 'bold
-                :extend t))))
+                ;; WHITESPACE ERRORS
+                (dolist (face '(
+                                   whitespace-trailing
+                                   whitespace-indentation
+                                   whitespace-space-before-tab
+                                   whitespace-space-after-tab
+                                   whitespace-empty))
+                    (set-face-attribute face nil
+                        :background warn-color
+                        :foreground warn-color
+                        :weight 'bold
+                        :extend t)))))
+
+    (add-hook 'enable-theme-functions 'onncera-vscode-dark-plus-whitespace-faces)
+    (onemacs-load-theme 'vscode-dark-plus))
 
 
 ;; ==============================================================================================================
