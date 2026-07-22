@@ -486,10 +486,10 @@
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; NOTE - give packages their own section if they require configuration
 ;; TODO - may be some of these can defer
-(use-package avy              :ensure t)
-(use-package casual           :ensure t)
-(use-package expand-region    :ensure t)
-(use-package goto-last-change :ensure t)
+(use-package avy              :ensure t :defer t)
+(use-package casual           :ensure t :defer t)
+(use-package expand-region    :ensure t :defer t)
+(use-package goto-last-change :ensure t :defer t)
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic-1 HARPOON
