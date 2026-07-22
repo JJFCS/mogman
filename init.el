@@ -26,9 +26,28 @@
 
 
 ;; ==============================================================================================================
+;; @topic PERFORMANCE
+;; ==============================================================================================================
+(defvar onncera-gc-cons-threshold (* 32 1024 1024))
+(defvar onncera-gc-cons-percentage 0.1)
+
+;; restore GC limits after startup completes
+(add-hook 'emacs-startup-hook
+    (lambda ()
+        (setq gc-cons-threshold       onncera-gc-cons-threshold)
+        (setq gc-cons-percentage      onncera-gc-cons-percentage)
+        (setq file-name-handler-alist onncera-file-name-handler-alist)))
+
+;; disable GC completely while typing in M-x or minibuffer prompts
+(add-hook 'minibuffer-setup-hook (lambda () (setq gc-cons-threshold most-positive-fixnum)))
+(add-hook 'minibuffer-exit-hook  (lambda () (setq gc-cons-threshold onncera-gc-cons-threshold)))
+
+
+;; ==============================================================================================================
 ;; @topic GENERAL SETTINGS
 ;; ==============================================================================================================
 (add-to-list 'exec-path "/opt/homebrew/bin")
+(add-to-list 'default-frame-alist '(fullscreen . fullboth))
 
 ;; NOTE - for variables we use 't' or 'nil'
 ;; NOTE - for functions we use numbers (1 == enabled , 0 == disabled , no number means toggle)
@@ -95,7 +114,6 @@
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; @check TODO - done by AI
 (defun onncera-highlight-todo ()
-    "Highlight important annotation keywords"
     (font-lock-add-keywords nil `((,(concat "\\<" (regexp-opt '("TODO" "FIXME" "BUG" "NOTE")) "\\>")
         0
         '(:foreground "red" :weight bold)
@@ -109,7 +127,7 @@
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; @check TODO - done by AI
 (defun onncera-smart-beginning-of-line ()
-    "moves cursor to first non-whitespace char or beg of line. alternates if called repeatedly"
+    "moves cursor to first non-whitespace char or beg of line - alternates"
     (interactive)
     (let ((old-point (point)))
         (back-to-indentation)
@@ -121,9 +139,7 @@
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; @check TODO - done by AI
 (defun onncera-set-up-whitespace-handling ()
-    "whitespace mode with trailing line protection"
     (interactive)
     (whitespace-mode)
         (setq-local delete-trailing-lines nil)  ;; stops emacs from deleting empty lines at the bottom of file
@@ -132,23 +148,12 @@
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; https://www.youtube.com/watch?v=M7-dJb2GTN4 (sacha chua & omar antolin camarena)
-;; block-undo (undo keyboard macros in a single step)
-(defun block-undo (fn &rest args)
-    "Apply FN to ARGS in such a way that it can be undone in a single step"
-    (undo-boundary)
-    (with-undo-amalgamate
-        (apply fn args)
+(defun onncera-helm-imenu-right ()
+    "run helm-imenu with the Helm window on the right"
+    (interactive)
+    (let ((helm-split-window-default-side 'right))
+    (helm-imenu)
     )
-)
-
-(dolist (fn '(
-                kmacro-call-macro
-                kmacro-exec-ring-item
-                apply-macro-to-region-lines
-            )
-        )
-    (advice-add fn :around 'block-undo)
 )
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -174,7 +179,7 @@
 ;; @check TODO - done by AI
 (defvar onncera-term-shell "/bin/bash" "The default shell path used for custom terminal commands")
 (defun onncera-ansi-term ()
-    "Launch `ansi-term` instantly using `onncera-term-shell` without prompting"
+    "Launch 'ansi-term' instantly using 'onncera-term-shell' without prompting"
     (interactive)
     (ansi-term onncera-term-shell)
 )
@@ -184,22 +189,19 @@
 ;; ==============================================================================================================
 ;; @topic THEMES / FONTS / APPEARANCES
 ;; ==============================================================================================================
-
-;; themes that are cool - perhaps in the future
-;; - "https://github.com/precompute/hyperstitional-themes"
-;; - "https://github.com/precompute/sculpture-themes"
-;; - "https://github.com/shaneikennedy/pierre-themes.el"
-;; - "https://github.com/Senka07/turboc-emacs-theme"
-
-(use-package ef-themes       :ensure t :defer t) (use-package modus-themes :ensure t :defer t)
-(use-package standard-themes :ensure t :defer t) (use-package doric-themes :ensure t :defer t)
-(use-package doom-themes     :ensure t :defer t)
-
-(use-package gruber-darker-theme     :ensure t :defer t)
-(use-package vscode-dark-plus-theme  :ensure t :defer t)
-(use-package pixel-themes                      :defer t :vc (:url "https://github.com/lucasobx/pixel-themes"))
+(use-package pixel-themes :defer t :vc (:url "https://github.com/lucasobx/pixel-themes"))
 
 ;; @check TODO - done by AI
+;; TODO - make comments and doc strings use 'Iosevka' font?
+(defun onemacs-apply-fonts ()
+    "apply personal font configuration"
+    (set-face-attribute 'default nil        :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
+    (set-face-attribute 'fixed-pitch nil    :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
+    (set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
+    (set-face-attribute 'completions-annotations nil :slant 'normal)
+    (set-face-attribute 'completions-common-part nil :slant 'normal)
+)
+
 (defun onemacs-load-theme (themes)
     "disable current themes and load THEME cleanly"
     (interactive
@@ -211,24 +213,50 @@
     )
     )
 
-    (mapc 'disable-theme custom-enabled-themes)  ;; disable all active themes
-    (load-theme themes t)  ;; load the requested theme
-    (onemacs-apply-fonts)  ;; reapply personal faces (fonts)
+    (mapc 'disable-theme custom-enabled-themes)
+    (load-theme themes t)
+    (onemacs-apply-fonts)
 )
 
-(defun onemacs-apply-fonts ()
-    "apply personal font configuration"
-    (set-face-attribute 'default nil        :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
-    (set-face-attribute 'fixed-pitch nil    :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
-    (set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
-    (set-face-attribute 'completions-annotations nil :slant 'normal)
-    (set-face-attribute 'completions-common-part nil :slant 'normal)
-)
+;; @check TODO - done by AI
+(use-package vscode-dark-plus-theme
+    :ensure t
+    :config
+    (require 'whitespace)
 
-(add-to-list 'custom-theme-load-path
-        (expand-file-name "onemacs-theme" user-emacs-directory)
-    )
-(onemacs-load-theme 'pixel-themes-alia16)  ;; here is where you declare what theme to use
+    (defun onncera-vscode-dark-plus-whitespace-faces (theme)
+        "apply subtle/error whitespace faces but only for vscode-dark-plus"
+        (when (eq theme 'vscode-dark-plus)
+            (let* ((bg (face-attribute 'default :background))
+                      (subtle (color-lighten-name bg 40))  ;; higher number == more visible - vice versa
+                      (warn-color (face-attribute 'error :foreground)))
+
+                ;; normal visible whitespace (subtle)
+                (dolist (face '(
+                                   whitespace-space
+                                   whitespace-hspace
+                                   whitespace-newline
+                                   whitespace-tab))
+                    (set-face-attribute face nil
+                        :foreground subtle
+                        :background 'unspecified
+                        :weight     'normal))
+
+                ;; WHITESPACE ERRORS
+                (dolist (face '(
+                                   whitespace-trailing
+                                   whitespace-indentation
+                                   whitespace-space-before-tab
+                                   whitespace-space-after-tab
+                                   whitespace-empty))
+                    (set-face-attribute face nil
+                        :background warn-color
+                        :foreground warn-color
+                        :weight 'bold
+                        :extend t)))))
+
+    (add-hook 'enable-theme-functions 'onncera-vscode-dark-plus-whitespace-faces)
+    (onemacs-load-theme 'vscode-dark-plus))
 
 
 ;; ==============================================================================================================
@@ -237,8 +265,21 @@
 
 ;; @subtopic-1 HELM
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; NOTE - perhaps we can include helm back in the future (can refer to deprecated)
+;; - NOTE: C-o does the toggling in helm-mode
+;; - TODO: INCLUDE THE FOLLOWING MODULES === HELM-PROJECTILE, HELM-SWOOP, helm-M-x-show-short-doc
 (use-package helm-describe-modes :ensure t :defer t)
+(use-package helm
+    :ensure t
+    :commands (helm-imenu)
+    :config
+    (require 'helm-buffers)
+    (require 'helm-imenu)
+    (setq helm-imenu-delimiter " = ")
+    :bind (:map helm-map
+        ("TAB" . helm-execute-persistent-action)
+        ("C-j" . helm-select-action)
+    )
+)
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic-1 VOMECCC
@@ -259,10 +300,9 @@
     (vertico-multiform-mode)
     (setq vertico-multiform-categories '((file (vertico-sort-function . onncera-vertico-find-file))))
     (setq vertico-multiform-commands '(
-        (consult-imenu buffer)
-        (consult-find  buffer)
-        (consult-grep  buffer)
-        (consult-line  buffer)
+        (consult-find buffer)
+        (consult-grep buffer)
+        (consult-line buffer)
         )
     )
 )
@@ -343,7 +383,7 @@
 ;; - NOTE : this shit HEAVY
 (use-package nucleo-completion
     :ensure t
-    :vc (:url "https://github.com/kn66/nucleo-completion.el" :rev :newest)
+    :vc (:url "https://github.com/kn66/nucleo-completion.el")
     :demand t
     :init
     (setq nucleo-completion-module-directory
@@ -443,32 +483,31 @@
 ;; @subtopic-1 AMALGAMATION
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; NOTE - give packages their own section if they require configuration
-(use-package avy              :ensure t :defer t)
-(use-package casual           :ensure t :defer t)
-(use-package expand-region    :ensure t :defer t)
-(use-package goto-last-change :ensure t :defer t)
+;; TODO - may be some of these can defer
+(use-package avy              :ensure t)
+(use-package casual           :ensure t)
+(use-package expand-region    :ensure t)
+(use-package goto-last-change :ensure t)
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic-1 HARPOON
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package javelin
     :ensure t
-    :config
-    (global-javelin-minor-mode 1)
-    (setq javelin-minor-mode-map
-        (make-sparse-keymap)
+    :config (global-javelin-minor-mode) (setq javelin-minor-mode-map
+                                            (make-sparse-keymap))  ;; remove all default keybindings
     )
-)
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic-1 MULTIPLE CURSORS
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package multiple-cursors :ensure t :defer t
     :init (setq mc/list-file "~/.emacs.d/onemacs-cache/mc-lists.el"))
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic-1 MOVE TEXT
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; TODO - may be can defer
 (use-package move-text
     :ensure t
     :config
@@ -482,10 +521,10 @@
     (advice-add 'move-text-up   :after #'onncera-move-text-indent-region-advice)
     (advice-add 'move-text-down :after #'onncera-move-text-indent-region-advice)
 )
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic-1 UNDO / REDO
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package vundo   :ensure t :defer t)
 (use-package undo-fu :ensure t
     :bind (
@@ -506,31 +545,27 @@
     :config
     (undo-fu-session-global-mode)
     )
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic-1 SET & FORGET
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; NOTE - these packages are super unlikely to change settings
+;; NOTE - you can exclude certain modes by using "setq inhibit-mouse-excluded-modes"
+(use-package inhibit-mouse :ensure t :config (inhibit-mouse-mode))
+(use-package colorful-mode :ensure t :hook (prog-mode . colorful-mode))
+
 (use-package exec-path-from-shell
     :ensure t
-    :if (and (display-graphic-p)
-        (eq system-type 'darwin))
-    :demand t
-    :config
-    (setq exec-path-from-shell-variables '("PATH"))
-    (exec-path-from-shell-initialize))
-(use-package inhibit-mouse :ensure t :defer t
-    :config
-    (setq inhibit-mouse-excluded-modes '(pdf-view-mode devdocs-mode))  ;; can use mouse in these modes
-    (inhibit-mouse-mode 1))
+    :if (and (display-graphic-p) (eq system-type 'darwin))
+    :config (exec-path-from-shell-initialize))
 
-(use-package colorful-mode :ensure t :hook (prog-mode . colorful-mode))
-(use-package keycast       :ensure t :defer t
+(use-package keycast
+    :ensure t
     :config
     (keycast-tab-bar-mode)
     (setq keycast-window-predicate 'always)
     (setq keycast-substitute-alist '()))
-(use-package which-key               :defer t
+
+(use-package which-key
     :config
     (setq which-key-show-early-on-C-h t)
     (setq which-key-idle-delay 1e6)
@@ -586,13 +621,11 @@
 ;; ==============================================================================================================
 ;; @topic HOOKS
 ;; ==============================================================================================================
-(add-hook 'emacs-startup-hook #'split-window-horizontally)
-(add-hook 'emacs-startup-hook #'toggle-frame-fullscreen t)
 (add-hook 'prog-mode-hook #'onncera-highlight-todo)
 (add-hook 'prog-mode-hook #'onncera-set-up-whitespace-handling)
 
 ;; the kill ring can accumulate text properties - fonts, overlays, etc
-;; that bloat the savehist file. doom emacs strips them before saving
+;; that bloats the savehist file. doom emacs strips them before saving
 (add-hook 'savehist-save-hook
     (lambda ()
         (setq kill-ring
@@ -606,6 +639,7 @@
 ;; @subtopic-1 imenu
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; @check TODO - done by AI
+;; TODO - need to create a section for 'subtopic-1' ASAP
 (add-hook
     'emacs-lisp-mode-hook
     (lambda ()
@@ -657,7 +691,7 @@
 ;; @subtopic-1 remaps
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (global-set-key [remap move-beginning-of-line] #'onncera-smart-beginning-of-line)
-(global-set-key [remap imenu] #'consult-imenu)
+(global-set-key [remap imenu] #'onncera-helm-imenu-right)
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic-1 reclaiming keys (unset)
@@ -665,26 +699,13 @@
 ;; separated into blocks so we can visualise better
 
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(global-unset-key (kbd "C-0")) (global-unset-key (kbd "M-0")) (global-unset-key (kbd "C-M-0"))
-(global-unset-key (kbd "C-1")) (global-unset-key (kbd "M-1")) (global-unset-key (kbd "C-M-1"))
-(global-unset-key (kbd "C-2")) (global-unset-key (kbd "M-2")) (global-unset-key (kbd "C-M-2"))
-(global-unset-key (kbd "C-3")) (global-unset-key (kbd "M-3")) (global-unset-key (kbd "C-M-3"))
-(global-unset-key (kbd "C-4")) (global-unset-key (kbd "M-4")) (global-unset-key (kbd "C-M-4"))
-(global-unset-key (kbd "C-5")) (global-unset-key (kbd "M-5")) (global-unset-key (kbd "C-M-5"))
-(global-unset-key (kbd "C-6")) (global-unset-key (kbd "M-6")) (global-unset-key (kbd "C-M-6"))
-(global-unset-key (kbd "C-7")) (global-unset-key (kbd "M-7")) (global-unset-key (kbd "C-M-7"))
-(global-unset-key (kbd "C-8")) (global-unset-key (kbd "M-8")) (global-unset-key (kbd "C-M-8"))
-(global-unset-key (kbd "C-9")) (global-unset-key (kbd "M-9")) (global-unset-key (kbd "C-M-9"))
+;; unbind default digit shortcuts (C-0..9, M-0..9, C-M-0..9)
+(dotimes (i 10)
+    (dolist (prefix '("C-" "M-" "C-M-"))
+        (global-unset-key (kbd (format "%s%d" prefix i)))))
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(global-unset-key (kbd "C-<end>"   )) (global-unset-key (kbd "M-<end>"   ))
-(global-unset-key (kbd "C-<prior>" )) (global-unset-key (kbd "M-<prior>" ))
-(global-unset-key (kbd "C-<help>"  )) (global-unset-key (kbd "M-<help>"  ))
-(global-unset-key (kbd "C-<home>"  )) (global-unset-key (kbd "M-<home>"  ))
-(global-unset-key (kbd "C-<next>"  )) (global-unset-key (kbd "M-<next>"  ))
-(global-unset-key (kbd "C-<delete>")) (global-unset-key (kbd "M-<delete>"))
-
 (global-unset-key (kbd "<end>"   ))      ;; this is the 'end'       key on my logitech keyboard
 (global-unset-key (kbd "<prior>" ))      ;; this is the 'page up'   key on my logitech keyboard
 (global-unset-key (kbd "<help>"  ))      ;; this is the 'insert'    key on my logitech keyboard
@@ -692,30 +713,18 @@
 (global-unset-key (kbd "<next>"  ))      ;; this is the 'page down' key on my logitech keyboard
 (global-unset-key (kbd "<deletechar>"))  ;; this is the 'delete'    key on my logitech keyboard
 
-(global-unset-key (kbd "C-M-<end>"   ))
-(global-unset-key (kbd "C-M-<prior>" ))
-(global-unset-key (kbd "C-M-<help>"  ))
-(global-unset-key (kbd "C-M-<home>"  ))
-(global-unset-key (kbd "C-M-<next>"  ))
-(global-unset-key (kbd "C-M-<delete>"))
+;; unbind navigation and editing keys across all modifier combinations
+(dolist (key '("<end>" "<prior>" "<help>" "<home>" "<next>" "<delete>" "<deletechar>"))
+    (dolist (prefix '("" "C-" "M-" "C-M-"))
+        (global-unset-key (kbd (format "%s%s" prefix key)))))
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(global-unset-key (kbd "<f9>" )) (global-unset-key (kbd "C-M-<f9>" ))
-(global-unset-key (kbd "<f10>")) (global-unset-key (kbd "C-M-<f10>"))
-(global-unset-key (kbd "<f11>")) (global-unset-key (kbd "C-M-<f11>"))
-(global-unset-key (kbd "<f12>")) (global-unset-key (kbd "C-M-<f12>"))
-(global-unset-key (kbd "<f13>")) (global-unset-key (kbd "C-M-<f13>"))
-(global-unset-key (kbd "<f14>")) (global-unset-key (kbd "C-M-<f14>"))
-(global-unset-key (kbd "<f15>")) (global-unset-key (kbd "C-M-<f15>"))
-
-(global-unset-key (kbd "C-<f9>" )) (global-unset-key (kbd "S-<f9>" )) (global-unset-key (kbd "M-<f9>" ))
-(global-unset-key (kbd "C-<f10>")) (global-unset-key (kbd "S-<f10>")) (global-unset-key (kbd "M-<f10>"))
-(global-unset-key (kbd "C-<f11>")) (global-unset-key (kbd "S-<f11>")) (global-unset-key (kbd "M-<f11>"))
-(global-unset-key (kbd "C-<f12>")) (global-unset-key (kbd "S-<f12>")) (global-unset-key (kbd "M-<f12>"))
-(global-unset-key (kbd "C-<f13>")) (global-unset-key (kbd "S-<f13>")) (global-unset-key (kbd "M-<f13>"))
-(global-unset-key (kbd "C-<f14>")) (global-unset-key (kbd "S-<f14>")) (global-unset-key (kbd "M-<f14>"))
-(global-unset-key (kbd "C-<f15>")) (global-unset-key (kbd "S-<f15>")) (global-unset-key (kbd "M-<f15>"))
+;; unbind F9-F15 across all modifier combinations (base, C-, M-, S-, C-M-)
+(dotimes (i 7)
+    (let ((f-key (format "<f%d>" (+ i 9))))
+        (dolist (prefix '("" "C-" "M-" "S-" "C-M-"))
+            (global-unset-key (kbd (format "%s%s" prefix f-key))))))
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; separated into blocks so we can visualise better
@@ -739,50 +748,93 @@
 ;; - version control - programming navigation workflow
 ;; - embark
 
-(global-set-key (kbd "<prior>")      'move-text-up)
-(global-set-key (kbd "<next>")       'move-text-down)
-(global-set-key (kbd "<home>")       'er/expand-region)
-(global-set-key (kbd "<end>")        'er/contract-region)
-(global-set-key (kbd "<help>")       'goto-last-change)              ;; An Emacs package to move point through buffer-undo-list positions
-(global-set-key (kbd "<deletechar>") 'pop-to-mark-command)           ;; pop back through recent cursor positions in the current buffer
+;; separated into blocks so we can visualise better
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(pcase-dolist (`(,key . ,cmd)
+                  '(
+                       ("<prior>"      . move-text-up)         ;; 'page up'
+                       ("<next>"       . move-text-down)       ;; 'page down'
+                       ("<home>"       . er/expand-region)     ;; 'home'
+                       ("<end>"        . er/contract-region)   ;; 'end'
+                       ("<help>"       . goto-last-change)     ;; 'insert'
+                       ("<deletechar>" . pop-to-mark-command)  ;; 'delete'
 
+                       ;; Future Modified Keys (just uncomment and fill in as you go!)
+                       ;; ("C-<home>"  . onncera-custom-command-one)  ;; CTRL + 'home'
+                       ;; ("M-<next>"  . onncera-custom-command-two)  ;; ALT  + 'page down'
+
+                       ))
+    (global-set-key (kbd key) cmd))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq avy-timeout-seconds 1.0)
-(global-set-key (kbd "C-0")          'avy-goto-char-timer)           ;; input an arbitrary amount of consecutive chars
-(global-set-key (kbd "M-0")          'avy-goto-char)                 ;; input one char , jump to it with a tree
-(global-set-key (kbd "C-M-0")        'avy-goto-line)                 ;; input zero chars , jump to a line start with a tree
-(global-set-key (kbd "C-1")          'end-of-defun)
-(global-set-key (kbd "C-2")          'beginning-of-defun)
-(global-set-key (kbd "C-3")          'mark-defun)
-(global-set-key (kbd "C-4")          'backward-sexp)
-(global-set-key (kbd "C-5")          'forward-sexp)
-(global-set-key (kbd "C-6")          'mark-sexp)
-(global-set-key (kbd "C-7")          'xref-go-back)
-(global-set-key (kbd "C-8")          'xref-find-definitions)
-(global-set-key (kbd "C-9")          'xref-find-references)
+(pcase-dolist (`(,key . ,cmd)
+                  '(
+                       ("C-0"   . avy-goto-char-timer)  ;; input an arbitrary amount of consecutive chars
+                       ("M-0"   . avy-goto-char)        ;; input one  char  , jump to it with a tree
+                       ("C-M-0" . avy-goto-line)        ;; input zero chars , jump to a line start with a tree
 
-(global-set-key (kbd "<f9>")         'javelin-go-or-assign-to-1)
-(global-set-key (kbd "<f10>")        'javelin-go-or-assign-to-2)
-(global-set-key (kbd "<f11>")        'javelin-go-or-assign-to-3)
-(global-set-key (kbd "<f12>")        'javelin-go-or-assign-to-4)
-(global-set-key (kbd "<f13>")        'javelin-delete)                ;; delete a specific position for the current project/branch
-(global-set-key (kbd "<f14>")        'javelin-clear)                 ;; delete all positions for current project/branch
-(global-set-key (kbd "<f15>")        'javelin-toggle-quick-menu)
+                       ("C-1"   . end-of-defun)
+                       ("C-2"   . beginning-of-defun)
+                       ("C-3"   . mark-defun)
 
-(global-set-key (kbd "C-<f9>")       'mc/mark-next-like-this)        ;; NOTE - need to select a region
-(global-set-key (kbd "C-<f10>")      'mc/mark-previous-like-this)    ;; NOTE - need to select a region
-(global-set-key (kbd "C-<f11>")      'mc/mark-next-like-this)
-(global-set-key (kbd "C-<f12>")      'mc/mark-previous-like-this)
-(global-set-key (kbd "C-<f13>")      'mc/mark-all-symbols-like-this-in-defun)
-(global-set-key (kbd "C-<f14>")      'mc/vertical-align-with-space)  ;; NOTE - select a region & add MCs with 'edit-lines' , then move to the end of the line and run this command
-(global-set-key (kbd "C-<f15>")      'mc/edit-lines)
+                       ("C-4"   . backward-sexp)
+                       ("C-5"   . forward-sexp)
+                       ("C-6"   . mark-sexp)
 
-(global-set-key (kbd "M-<f9>")       'git-gutter:next-hunk)
-(global-set-key (kbd "M-<f10>")      'git-gutter:previous-hunk)
-(global-set-key (kbd "M-<f11>")      'git-gutter:popup-hunk)
-(global-set-key (kbd "M-<f12>")      'magit-log-buffer-file)
+                       ("C-7"   . xref-go-back)
+                       ("C-8"   . xref-find-definitions)
+                       ("C-9"   . xref-find-references)
 
-(global-set-key (kbd "C-,")          'embark-act)
-(global-set-key (kbd "C-.")          'embark-dwim)
+                       ))
+    (global-set-key (kbd key) cmd))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(pcase-dolist (`(,key . ,cmd)
+                  '(
+                       ;; Javelin
+                       ("<f9>"   . javelin-go-or-assign-to-1)
+                       ("<f10>"  . javelin-go-or-assign-to-2)
+                       ("<f11>"  . javelin-go-or-assign-to-3)
+                       ("<f12>"  . javelin-go-or-assign-to-4)
+                       ("<f13>"  . javelin-delete)                 ;; delete a specific position for the current project/branch
+                       ("<f14>"  . javelin-clear)                  ;; delete all positions for current project/branch
+                       ("<f15>"  . javelin-toggle-quick-menu)
+
+                       ;; Multiple Cursors
+                       ("C-<f9>"  . mc/mark-previous-like-this)    ;; NOTE - need to select a region
+                       ("C-<f10>" . mc/mark-next-like-this)        ;; NOTE - need to select a region
+                       ("C-<f11>" . mc/skip-to-previous-like-this)
+                       ("C-<f12>" . mc/skip-to-next-like-this)
+                       ("C-<f13>" . mc/mark-all-symbols-like-this-in-defun)
+                       ("C-<f14>" . mc/vertical-align-with-space)  ;; NOTE - select a region & add MCs with 'edit-lines' , then move to the end of the line and run this command
+                       ("C-<f15>" . mc/edit-lines)
+
+                       ;; version control
+                       ("M-<f9>"  . git-gutter:next-hunk)
+                       ("M-<f10>" . git-gutter:previous-hunk)
+                       ("M-<f11>" . git-gutter:popup-hunk)
+                       ("M-<f12>" . magit-log-buffer-file)
+
+                       ))
+    (global-set-key (kbd key) cmd))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(global-set-key (kbd "C-,") 'embark-act)
+(global-set-key (kbd "C-.") 'embark-dwim)
+(global-set-key (kbd "M-o") 'other-window)
+
+;; TODO - seems cool..
+;; (global-set-key (kbd "M-p") (lambda () (interactive) (previous-logical-line) (recenter)))
+;; (global-set-key (kbd "M-n") (lambda () (interactive) (next-logical-line)     (recenter)))
+;; (global-set-key (kbd "M-[") (lambda () (interactive) (backward-paragraph)    (recenter)))
+;; (global-set-key (kbd "M-]") (lambda () (interactive) (forward-paragraph)     (recenter)))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; separated into blocks so we can visualise better
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
