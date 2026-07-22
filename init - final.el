@@ -47,6 +47,7 @@
 ;; @topic GENERAL SETTINGS
 ;; ==============================================================================================================
 (add-to-list 'exec-path "/opt/homebrew/bin")
+(add-to-list 'default-frame-alist '(fullscreen . fullboth))
 
 ;; NOTE - for variables we use 't' or 'nil'
 ;; NOTE - for functions we use numbers (1 == enabled , 0 == disabled , no number means toggle)
@@ -612,65 +613,264 @@
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+;; ==============================================================================================================
+;; @topic HOOKS
+;; ==============================================================================================================
+(add-hook 'prog-mode-hook #'onncera-highlight-todo)
+(add-hook 'prog-mode-hook #'onncera-set-up-whitespace-handling)
+
+;; the kill ring can accumulate text properties - fonts, overlays, etc
+;; that bloats the savehist file. doom emacs strips them before saving
+(add-hook 'savehist-save-hook
+    (lambda ()
+        (setq kill-ring
+            (mapcar #'substring-no-properties
+                (cl-remove-if-not #'stringp kill-ring)
+            )
+        )
+    )
+)
+
+;; @subtopic-1 imenu
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+;; TODO - need to create a section for 'subtopic-1' ASAP
+(add-hook
+    'emacs-lisp-mode-hook
+    (lambda ()
+        ;; Save the original index function installed by emacs-lisp-mode.
+        (setq-local onncera-original-imenu-create-index-function
+                    imenu-create-index-function)
+
+        ;; Replace it with our wrapper.
+        (setq-local imenu-create-index-function
+                    #'onncera-elisp-imenu-create-index)
+    )
+)
+
+(defun onncera-elisp-imenu-create-index ()
+    "extend the builtin emacs lisp imenu index with custom entries"
+    (let ((index (funcall onncera-original-imenu-create-index-function)))
+    (append index
+        (imenu--generic-function '(
+            ("checks" "^[^\n]*\\(?:@check\\|TODO\\)[[:space:]]+\\(.+\\)$" 1)
+            ("topics" "^[^\n]*@topic[[:space:]]+\\(.+\\)$" 1)
+        )
+        )
+    )
+    )
+)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+;; ==============================================================================================================
+;; @topic KEYBINDINGS
+;; ==============================================================================================================
+;; super cool and important commands/keybindings:
+;; > view-lossage            (C-h l)
+;; > view-echo-area-messages (C-h e)
+
+;; @subtopic-1 a-map
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(defvar onncera-a-map (make-sparse-keymap) "onncera C-c a prefix")
+(global-set-key (kbd "C-c a") onncera-a-map)
+(define-key onncera-a-map (kbd "t") #'onncera-ansi-term)
+
+;; example for non builtin commands
+;; b - (reserved, example only, uncomment + fill in when needed)
+;; (with-eval-after-load 'magit
+;;   (define-key onncera-a-map (kbd "b") #'magit-status))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic-1 remaps
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(global-set-key [remap move-beginning-of-line] #'onncera-smart-beginning-of-line)
+(global-set-key [remap imenu] #'onncera-helm-imenu-right)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic-1 reclaiming keys (unset)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; separated into blocks so we can visualise better
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; unbind default digit shortcuts (C-0..9, M-0..9, C-M-0..9)
+(dotimes (i 10)
+    (dolist (prefix '("C-" "M-" "C-M-"))
+        (global-unset-key (kbd (format "%s%d" prefix i)))))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(global-unset-key (kbd "<end>"   ))      ;; this is the 'end'       key on my logitech keyboard
+(global-unset-key (kbd "<prior>" ))      ;; this is the 'page up'   key on my logitech keyboard
+(global-unset-key (kbd "<help>"  ))      ;; this is the 'insert'    key on my logitech keyboard
+(global-unset-key (kbd "<home>"  ))      ;; this is the 'home'      key on my logitech keyboard
+(global-unset-key (kbd "<next>"  ))      ;; this is the 'page down' key on my logitech keyboard
+(global-unset-key (kbd "<deletechar>"))  ;; this is the 'delete'    key on my logitech keyboard
+
+;; unbind navigation and editing keys across all modifier combinations
+(dolist (key '("<end>" "<prior>" "<help>" "<home>" "<next>" "<delete>" "<deletechar>"))
+    (dolist (prefix '("" "C-" "M-" "C-M-"))
+        (global-unset-key (kbd (format "%s%s" prefix key)))))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; unbind F9-F15 across all modifier combinations (base, C-, M-, S-, C-M-)
+(dotimes (i 7)
+    (let ((f-key (format "<f%d>" (+ i 9))))
+        (dolist (prefix '("" "C-" "M-" "S-" "C-M-"))
+            (global-unset-key (kbd (format "%s%s" prefix f-key))))))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; separated into blocks so we can visualise better
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic-1 navigation
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; TODO - place this in bashrc (alias emacs="/Applications/Emacs.app/Contents/MacOS/Emacs")
+;; so that when we want to have a look at what vanilla
+;; emacs original keybindings are , you can just run "emacs -Q" in the terminal
+
+;; ORDER
+;; - move-text
+;; - expand-region
+;; - edited last & mark ring navigation
+;; - avy
+;; - Jumping by function
+;; - sexp - balanced expression
+;; - xref
+;; - multiple-cursors
+;; - version control - programming navigation workflow
+;; - embark
+
+;; separated into blocks so we can visualise better
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(pcase-dolist (`(,key . ,cmd)
+                  '(
+                       ("<prior>"      . move-text-up)         ;; 'page up'
+                       ("<next>"       . move-text-down)       ;; 'page down'
+                       ("<home>"       . er/expand-region)     ;; 'home'
+                       ("<end>"        . er/contract-region)   ;; 'end'
+                       ("<help>"       . goto-last-change)     ;; 'insert'
+                       ("<deletechar>" . pop-to-mark-command)  ;; 'delete'
+
+                       ;; Future Modified Keys (just uncomment and fill in as you go!)
+                       ;; ("C-<home>"  . onncera-custom-command-one)  ;; CTRL + 'home'
+                       ;; ("M-<next>"  . onncera-custom-command-two)  ;; ALT  + 'page down'
+
+                       ))
+    (global-set-key (kbd key) cmd))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq avy-timeout-seconds 1.0)
+(pcase-dolist (`(,key . ,cmd)
+                  '(
+                       ("C-0"   . avy-goto-char-timer)  ;; input an arbitrary amount of consecutive chars
+                       ("M-0"   . avy-goto-char)        ;; input one  char  , jump to it with a tree
+                       ("C-M-0" . avy-goto-line)        ;; input zero chars , jump to a line start with a tree
+
+                       ("C-1"   . end-of-defun)
+                       ("C-2"   . beginning-of-defun)
+                       ("C-3"   . mark-defun)
+
+                       ("C-4"   . backward-sexp)
+                       ("C-5"   . forward-sexp)
+                       ("C-6"   . mark-sexp)
+
+                       ("C-7"   . xref-go-back)
+                       ("C-8"   . xref-find-definitions)
+                       ("C-9"   . xref-find-references)
+
+                       ))
+    (global-set-key (kbd key) cmd))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(pcase-dolist (`(,key . ,cmd)
+                  '(
+                       ;; Javelin
+                       ("<f9>"   . javelin-go-or-assign-to-1)
+                       ("<f10>"  . javelin-go-or-assign-to-2)
+                       ("<f11>"  . javelin-go-or-assign-to-3)
+                       ("<f12>"  . javelin-go-or-assign-to-4)
+                       ("<f13>"  . javelin-delete)                 ;; delete a specific position for the current project/branch
+                       ("<f14>"  . javelin-clear)                  ;; delete all positions for current project/branch
+                       ("<f15>"  . javelin-toggle-quick-menu)
+
+                       ;; Multiple Cursors
+                       ("C-<f9>"  . mc/mark-previous-like-this)    ;; NOTE - need to select a region
+                       ("C-<f10>" . mc/mark-next-like-this)        ;; NOTE - need to select a region
+                       ("C-<f11>" . mc/skip-to-previous-like-this)
+                       ("C-<f12>" . mc/skip-to-next-like-this)
+                       ("C-<f13>" . mc/mark-all-symbols-like-this-in-defun)
+                       ("C-<f14>" . mc/vertical-align-with-space)  ;; NOTE - select a region & add MCs with 'edit-lines' , then move to the end of the line and run this command
+                       ("C-<f15>" . mc/edit-lines)
+
+                       ;; version control
+                       ("M-<f9>"  . git-gutter:next-hunk)
+                       ("M-<f10>" . git-gutter:previous-hunk)
+                       ("M-<f11>" . git-gutter:popup-hunk)
+                       ("M-<f12>" . magit-log-buffer-file)
+
+                       ))
+    (global-set-key (kbd key) cmd))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(global-set-key (kbd "C-,") 'embark-act)
+(global-set-key (kbd "C-.") 'embark-dwim)
+(global-set-key (kbd "M-o") 'other-window)
+
+;; TODO - seems cool..
+;; (global-set-key (kbd "M-p") (lambda () (interactive) (previous-logical-line) (recenter)))
+;; (global-set-key (kbd "M-n") (lambda () (interactive) (next-logical-line)     (recenter)))
+;; (global-set-key (kbd "M-[") (lambda () (interactive) (backward-paragraph)    (recenter)))
+;; (global-set-key (kbd "M-]") (lambda () (interactive) (forward-paragraph)     (recenter)))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; separated into blocks so we can visualise better
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+;; ==============================================================================================================
+;; @topic TESTING PLAYGROUND
+;; ==============================================================================================================
+;; NOTE - packages to explore more:
+;; > yuta   (https://github.com/zenitsu7772000/yuta.el)
 
+;; @subtopic-1 ISEARCH
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; taken from prot (https://protesilaos.com/codelog/2026-04-30-emacs-decent-default-sacha-chua/)
+(use-package isearch
+    :config
+    (setq search-whitespace-regexp ".*?")
+    (setq isearch-lax-whitespace t)
+    (setq isearch-regexp-lax-whitespace nil)
+    (setq isearch-lazy-count t)
+    (setq lazy-count-prefix-format "(%s/%s) ")
+    (setq lazy-count-suffix-format nil)
+)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; @subtopic-1 DIRED
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; taken from prot (https://protesilaos.com/codelog/2026-04-30-emacs-decent-default-sacha-chua/)
+(use-package dired
+    :config
+    (setq delete-by-moving-to-trash t)
+    (setq dired-create-destination-dirs 'ask)
+    (setq dired-create-destination-dirs-on-trailing-dirsep t)  ;; emacs 29
+)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+;; @subtopic-1 EDIFF
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; taken from prot (https://protesilaos.com/codelog/2026-04-30-emacs-decent-default-sacha-chua/)
+(use-package ediff
+    :config
+    (setq ediff-split-window-function 'split-window-horizontally)
+    (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
