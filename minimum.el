@@ -152,11 +152,72 @@
 ;; ==============================================================================================================
 ;; @topic THEMES / FONTS / APPEARANCES
 ;; ==============================================================================================================
-(load-theme 'modus-vivendi t)
+;; @check TODO - done by AI
+(defun onemacs-apply-fonts ()
+    "apply personal font configuration"
+    (set-face-attribute 'default nil        :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
+    (set-face-attribute 'fixed-pitch nil    :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
+    (set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
+    (set-face-attribute 'completions-annotations nil :slant 'normal)
+    (set-face-attribute 'completions-common-part nil :slant 'normal)
+)
 
-(set-face-attribute 'default nil        :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
-(set-face-attribute 'fixed-pitch nil    :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
-(set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
+(defun onemacs-load-theme (themes)
+    "disable current themes and load THEME cleanly"
+    (interactive
+    (list (intern (completing-read
+        "Theme: "
+        (custom-available-themes)
+    )
+    )
+    )
+    )
+
+    (mapc 'disable-theme custom-enabled-themes)
+    (load-theme themes t)
+    (onemacs-apply-fonts)
+)
+
+;; @check TODO - done by AI
+(use-package vscode-dark-plus-theme
+    :ensure t
+    :config
+    (require 'color)
+    (require 'whitespace)
+
+    (defun onncera-vscode-dark-plus-whitespace-faces (theme)
+        "apply subtle/error whitespace faces but only for vscode-dark-plus"
+        (when (eq theme 'vscode-dark-plus)
+            (let* ((bg (face-attribute 'default :background))
+                      (subtle (color-lighten-name bg 40))  ;; higher number == more visible - vice versa
+                      (warn-color (face-attribute 'error :foreground)))
+
+                ;; normal visible whitespace (subtle)
+                (dolist (face '(
+                                   whitespace-space
+                                   whitespace-hspace
+                                   whitespace-newline
+                                   whitespace-tab))
+                    (set-face-attribute face nil
+                        :foreground subtle
+                        :background 'unspecified
+                        :weight     'normal))
+
+                ;; WHITESPACE ERRORS
+                (dolist (face '(
+                                   whitespace-trailing
+                                   whitespace-indentation
+                                   whitespace-space-before-tab
+                                   whitespace-space-after-tab
+                                   whitespace-empty))
+                    (set-face-attribute face nil
+                        :background warn-color
+                        :foreground warn-color
+                        :weight 'bold
+                        :extend t)))))
+
+    (add-hook 'enable-theme-functions 'onncera-vscode-dark-plus-whitespace-faces)
+    (onemacs-load-theme 'vscode-dark-plus))
 
 
 ;; ==============================================================================================================
@@ -202,16 +263,27 @@
     (icomplete-vertical-mode 1))
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; @subtopic-1 COMPANY
+;; @subtopic-1 CORFU & CAPE
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package company
-    :ensure t
-    :init
-    (setq tab-always-indent 'complete)
-    :config
-    (setq company-backends
-        '((company-capf company-dabbrev-code company-keywords) company-files company-dabbrev))
-    (global-company-mode 1))
+
+(use-package corfu :ensure t :config (setq corfu-auto t) (global-corfu-mode))
+(use-package cape  :ensure t :config
+
+    (defun onncera-cape-capf-setup-prog ()
+        (setq-local completion-at-point-functions
+            (list (cape-capf-super #'cape-dabbrev #'cape-file)
+                #'cape-keyword)))
+
+    (defun onncera-cape-capf-setup-text ()
+        (setq-local completion-at-point-functions
+            (list (cape-capf-super #'cape-dabbrev #'cape-dict)
+                #'cape-file)))
+
+    :hook
+    (prog-mode . onncera-cape-capf-setup-prog)
+    (text-mode . onncera-cape-capf-setup-text)
+
+)
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -345,6 +417,7 @@
 ;; @topic HOOKS
 ;; ==============================================================================================================
 (add-hook 'prog-mode-hook 'onncera-highlight-todo)
+(add-hook 'prog-mode-hook 'whitespace-mode)
 
 ;; @subtopic-1 imenu
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -523,8 +596,8 @@
                        ("C-<f15>" . mc/edit-lines)
 
                        ;; version control
-                       ("M-<f9>"  . git-gutter:next-hunk)
-                       ("M-<f10>" . git-gutter:previous-hunk)
+                       ("M-<f9>"  . git-gutter:previous-hunk)
+                       ("M-<f10>" . git-gutter:next-hunk)
                        ("M-<f11>" . git-gutter:popup-hunk)
                        ("M-<f12>" . magit-log-buffer-file)
 
