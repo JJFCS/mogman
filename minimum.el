@@ -152,31 +152,9 @@
 ;; ==============================================================================================================
 ;; @topic THEMES / FONTS / APPEARANCES
 ;; ==============================================================================================================
-;; @check TODO - done by AI
-(defun onemacs-apply-fonts ()
-    "apply personal font configuration"
-    (set-face-attribute 'default nil        :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
-    (set-face-attribute 'fixed-pitch nil    :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
-    (set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
-    (set-face-attribute 'completions-annotations nil :slant 'normal)
-    (set-face-attribute 'completions-common-part nil :slant 'normal)
-)
-
-(defun onemacs-load-theme (themes)
-    "disable current themes and load THEME cleanly"
-    (interactive
-    (list (intern (completing-read
-        "Theme: "
-        (custom-available-themes)
-    )
-    )
-    )
-    )
-
-    (mapc 'disable-theme custom-enabled-themes)
-    (load-theme themes t)
-    (onemacs-apply-fonts)
-)
+(set-face-attribute 'default nil        :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
+(set-face-attribute 'fixed-pitch nil    :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
+(set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
 
 ;; @check TODO - done by AI
 (use-package vscode-dark-plus-theme
@@ -217,7 +195,7 @@
                         :extend t)))))
 
     (add-hook 'enable-theme-functions 'onncera-vscode-dark-plus-whitespace-faces)
-    (onemacs-load-theme 'vscode-dark-plus))
+    (load-theme 'vscode-dark-plus t))
 
 
 ;; ==============================================================================================================
