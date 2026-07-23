@@ -245,28 +245,33 @@
 )
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; @subtopic-1 ICOMPLETE
+;; @subtopic-1 VOMCC
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package icomplete
-    :demand t
-    :bind
-    (:map icomplete-minibuffer-map
-        ("TAB" . icomplete-force-complete)
-        ("RET" . icomplete-force-complete-and-exit))
+(use-package marginalia :ensure t :config (setq marginalia-align 'right) (marginalia-mode))
+(use-package orderless  :ensure t
     :config
-    (setq completion-styles '(basic substring partial-completion flex))
-    (setq read-file-name-completion-ignore-case t)
-    (setq read-buffer-completion-ignore-case t)
-    (setq completion-ignore-case t)
-    (setq icomplete-show-matches-on-no-input t)
-    (icomplete-mode 1)
-    (icomplete-vertical-mode 1)
-    (setq icomplete-scroll t))
+    (setq completion-styles '(orderless basic)
+            )
+)
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; @subtopic-1 CORFU & CAPE
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package vertico :ensure t
+    :config
+    (require 'vertico-multiform)
+    (vertico-mode)
+    (vertico-multiform-mode)
+    (setq vertico-multiform-categories '((file (vertico-sort-function . onncera-vertico-find-file))))
+    (setq vertico-multiform-commands '(
+        (consult-find buffer)
+        (consult-grep buffer)
+        (consult-line buffer)
+        )
+    )
+)
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package corfu :ensure t :config (setq corfu-auto t) (global-corfu-mode))
 (use-package cape  :ensure t :config
 
@@ -411,6 +416,50 @@
     (setq which-key-idle-delay 1e6)
     (setq which-key-idle-secondary-delay 0.05)
     (which-key-mode))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; ==============================================================================================================
+;; @topic FUNCTIONS / VARIABLES - PART 2
+;; ==============================================================================================================
+;; NOTE - Functions / Variables that need to be defined at a later stage
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; @check TODO - done by AI
+(defun onncera-vertico-find-file (candidates)
+"Sort CANDIDATES by dotfiles first, then dot-dirs, then files, then dirs (all in alphabetical order)"
+    ;; speed up file operations during sorting.. emacs has a ton of background checks. Turn them off
+    (let ((file-name-handler-alist nil))
+        (sort candidates
+        (lambda (a b)
+        (let* (
+            (a-dot (string-prefix-p "." a))  ;; checks if file "a" starts with a dot. If it does, true
+            (b-dot (string-prefix-p "." b))  ;; do the same for the below
+            (a-dir (string-suffix-p "/" a))  ;; so for any two items, emacs knows is it a dotfile or a dir
+            (b-dir (string-suffix-p "/" b))
+        )
+
+        (cond  ;; now we have our sorting rules
+        ;; rule 1 : place "." and ".." always stay at the very top
+        ((string-match-p "\\`\\.\\.?/\\'" a) t)
+        ((string-match-p "\\`\\.\\.?/\\'" b) nil)
+
+        ;; rule 2 : priortise dotfiles over regular files
+        ((and a-dot (not b-dot)) t)
+        ((and (not a-dot) b-dot) nil)
+
+
+        ;; rule 3 : Within dotfiles, prefer files over directories
+        ((and a-dot b-dot)
+            (if (and (not a-dir) b-dir) t
+                (if (and a-dir (not b-dir)) nil
+                    (string< a b))))
+
+        ;; rule 4 : Within regular files, prefer files over directories
+        (t
+            (if (and (not a-dir) b-dir) t
+                (if (and a-dir (not b-dir)) nil
+                    (string< a b))))))))))
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
