@@ -260,7 +260,8 @@
     (setq completion-ignore-case t)
     (setq icomplete-show-matches-on-no-input t)
     (icomplete-mode 1)
-    (icomplete-vertical-mode 1))
+    (icomplete-vertical-mode 1)
+    (setq icomplete-scroll t))
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic-1 CORFU & CAPE
