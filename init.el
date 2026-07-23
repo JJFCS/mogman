@@ -641,7 +641,6 @@
 ;; @subtopic-1 imenu
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; @check TODO - done by AI
-;; TODO - need to create a section for 'subtopic-1' ASAP
 (add-hook
     'emacs-lisp-mode-hook
     (lambda ()
@@ -845,7 +844,8 @@
 ;; @topic TESTING PLAYGROUND
 ;; ==============================================================================================================
 ;; NOTE - packages to explore more:
-;; > yuta   (https://github.com/zenitsu7772000/yuta.el)
+;; > flex (https://github.com/kn66/flex-x)
+;; > yuta (https://github.com/zenitsu7772000/yuta.el)
 
 ;; @subtopic-1 ISEARCH
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
