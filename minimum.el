@@ -156,46 +156,55 @@
 (set-face-attribute 'fixed-pitch nil    :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
 (set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
 
+(use-package avk-emacs-themes :vc (:url "https://github.com/avkoval/avk-emacs-themes.git" :rev :newest))
+
 ;; @check TODO - done by AI
-(use-package vscode-dark-plus-theme
-    :ensure t
-    :config
-    (require 'color)
-    (require 'whitespace)
+(require 'color)
+(require 'whitespace)
 
-    (defun onncera-vscode-dark-plus-whitespace-faces (theme)
-        "apply subtle/error whitespace faces but only for vscode-dark-plus"
-        (when (eq theme 'vscode-dark-plus)
-            (let* ((bg (face-attribute 'default :background))
-                      (subtle (color-lighten-name bg 40))  ;; higher number == more visible - vice versa
-                      (warn-color (face-attribute 'error :foreground)))
+(defun onncera-apply-subtle-whitespace (&rest _args)
+  "Apply subtle whitespace faces after any theme is loaded."
+  (let* ((bg (face-attribute 'default :background nil t))
+         (fg (face-attribute 'default :foreground nil t))
+         ;; Grab the theme's built-in muted 'shadow face color
+         (shadow-fg (face-attribute 'shadow :foreground nil t))
+         ;; Fallback color math if shadow face isn't set by the theme
+         (subtle (if (and shadow-fg (not (eq shadow-fg 'unspecified)))
+                     shadow-fg
+                   (if (eq (frame-parameter nil 'background-mode) 'dark)
+                       (color-lighten-name bg 12)
+                     (color-darken-name bg 12))))
+         (warn-fg (or (face-attribute 'error :foreground nil t) "red")))
 
-                ;; normal visible whitespace (subtle)
-                (dolist (face '(
-                                   whitespace-space
-                                   whitespace-hspace
-                                   whitespace-newline
-                                   whitespace-tab))
-                    (set-face-attribute face nil
-                        :foreground subtle
-                        :background 'unspecified
-                        :weight     'normal))
+    ;; 1. Standard whitespace (spaces, tabs, newlines) -> Subtle & no background box
+    (dolist (face '(whitespace-space
+                    whitespace-hspace
+                    whitespace-newline
+                    whitespace-tab
+                    whitespace-line))
+      (set-face-attribute face nil
+                          :foreground subtle
+                          :background 'unspecified
+                          :weight     'normal
+                          :slant      'normal))
 
-                ;; WHITESPACE ERRORS
-                (dolist (face '(
-                                   whitespace-trailing
-                                   whitespace-indentation
-                                   whitespace-space-before-tab
-                                   whitespace-space-after-tab
-                                   whitespace-empty))
-                    (set-face-attribute face nil
-                        :background warn-color
-                        :foreground warn-color
-                        :weight 'bold
-                        :extend t)))))
+    ;; 2. Problematic whitespace (trailing spaces, bad indents) -> Clear warning
+    (dolist (face '(whitespace-trailing
+                    whitespace-indentation
+                    whitespace-space-before-tab
+                    whitespace-space-after-tab
+                    whitespace-empty))
+      (set-face-attribute face nil
+                          :background warn-fg
+                          :foreground bg
+                          :weight     'bold
+                          :extend     t))))
 
-    (add-hook 'enable-theme-functions 'onncera-vscode-dark-plus-whitespace-faces)
-    (load-theme 'vscode-dark-plus t))
+;; Run automatically after ANY theme is loaded
+(advice-add 'load-theme :after #'onncera-apply-subtle-whitespace)
+
+;; Test loading a theme (no bare `(load-theme )` call)
+(load-theme 'leuven-dark t)
 
 
 ;; ==============================================================================================================
