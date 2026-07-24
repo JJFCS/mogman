@@ -159,6 +159,7 @@
 ;; @check TODO - done by AI
 (require 'color)
 (require 'whitespace)
+(require 'term)
 (defun onncera-apply-subtle-whitespace (&rest _args)
     "subtle whitespace faces after any theme is loaded"
     (let* ((bg (face-attribute 'default :background nil t))
@@ -229,7 +230,7 @@
         (when (not (eq type    'unspecified)) (set-face-attribute 'term-color-cyan nil    :foreground type))))
 
 ;; run automatically whenever any theme loads
-(advice-add 'load-theme :after #'my/sync-ansi-colors-with-theme)
+(advice-add 'load-theme :after 'onncera-sync-ansi-colors-with-theme)
 
 (load-theme 'adwaita t)
 
