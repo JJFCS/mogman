@@ -156,25 +156,22 @@
 (set-face-attribute 'fixed-pitch nil    :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
 (set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
 
-(use-package avk-emacs-themes :vc (:url "https://github.com/avkoval/avk-emacs-themes.git" :rev :newest))
-
 ;; @check TODO - done by AI
 (require 'color)
 (require 'whitespace)
-
 (defun onncera-apply-subtle-whitespace (&rest _args)
-  "Apply subtle whitespace faces after any theme is loaded."
-  (let* ((bg (face-attribute 'default :background nil t))
-         (fg (face-attribute 'default :foreground nil t))
-         ;; Grab the theme's built-in muted 'shadow face color
-         (shadow-fg (face-attribute 'shadow :foreground nil t))
-         ;; Fallback color math if shadow face isn't set by the theme
-         (subtle (if (and shadow-fg (not (eq shadow-fg 'unspecified)))
-                     shadow-fg
+    "subtle whitespace faces after any theme is loaded"
+    (let* ((bg (face-attribute 'default :background nil t))
+           (fg (face-attribute 'default :foreground nil t))
+           ;; Grab the theme's builtin muted 'shadow' face color
+           (shadow-fg (face-attribute 'shadow :foreground nil t))
+           ;; Fallback color math if shadow face isn't set by the theme
+           (subtle (if (and shadow-fg (not (eq shadow-fg 'unspecified)))
+                       shadow-fg
                    (if (eq (frame-parameter nil 'background-mode) 'dark)
                        (color-lighten-name bg 12)
                      (color-darken-name bg 12))))
-         (warn-fg (or (face-attribute 'error :foreground nil t) "red")))
+           (warn-fg (or (face-attribute 'error :foreground nil t) "red")))
 
     ;; 1. Standard whitespace (spaces, tabs, newlines) -> Subtle & no background box
     (dolist (face '(whitespace-space
@@ -182,11 +179,11 @@
                     whitespace-newline
                     whitespace-tab
                     whitespace-line))
-      (set-face-attribute face nil
-                          :foreground subtle
-                          :background 'unspecified
-                          :weight     'normal
-                          :slant      'normal))
+        (set-face-attribute face nil
+            :foreground subtle
+            :background 'unspecified
+            :weight     'normal
+            :slant      'normal))
 
     ;; 2. Problematic whitespace (trailing spaces, bad indents) -> Clear warning
     (dolist (face '(whitespace-trailing
@@ -194,16 +191,46 @@
                     whitespace-space-before-tab
                     whitespace-space-after-tab
                     whitespace-empty))
-      (set-face-attribute face nil
-                          :background warn-fg
-                          :foreground bg
-                          :weight     'bold
-                          :extend     t))))
+        (set-face-attribute face nil
+            :background warn-fg
+            :foreground bg
+            :weight     'bold
+            :extend     t))))
 
-;; Run automatically after ANY theme is loaded
-(advice-add 'load-theme :after #'onncera-apply-subtle-whitespace)
+;; run automatically after any theme is loaded
+(advice-add 'load-theme :after 'onncera-apply-subtle-whitespace)
 
-;; Test loading a theme (no bare `(load-theme )` call)
+;; @check TODO - done by AI
+(defun onncera-sync-ansi-colors-with-theme (&rest _args)
+    "Map ANSI terminal colors directly to native Emacs theme faces"
+    (let (
+             (fg       (face-attribute 'default                 :foreground nil t))
+             (shadow   (face-attribute 'shadow                  :foreground nil t))
+             (err      (face-attribute 'error                   :foreground nil t))
+             (warn     (face-attribute 'warning                 :foreground nil t))
+             (succ     (face-attribute 'success                 :foreground nil t))
+             (keyword  (face-attribute 'font-lock-keyword-face  :foreground nil t))
+             (const    (face-attribute 'font-lock-constant-face :foreground nil t))
+             (type     (face-attribute 'font-lock-type-face     :foreground nil t))
+         )
+
+        ;; this is our theme's default text color (ansi white)
+        (set-face-attribute 'term-color-white nil :foreground fg)
+
+        ;; this is our theme's muted/shadow color (ansi black)
+        (set-face-attribute 'term-color-black nil :foreground (if (eq shadow 'unspecified) fg shadow))
+
+        ;; ansi standard colors -> Syntax faces from the active theme
+        (when (not (eq err     'unspecified)) (set-face-attribute 'term-color-red nil     :foreground err))
+        (when (not (eq succ    'unspecified)) (set-face-attribute 'term-color-green nil   :foreground succ))
+        (when (not (eq warn    'unspecified)) (set-face-attribute 'term-color-yellow nil  :foreground warn))
+        (when (not (eq keyword 'unspecified)) (set-face-attribute 'term-color-blue nil    :foreground keyword))
+        (when (not (eq const   'unspecified)) (set-face-attribute 'term-color-magenta nil :foreground const))
+        (when (not (eq type    'unspecified)) (set-face-attribute 'term-color-cyan nil    :foreground type))))
+
+;; run automatically whenever any theme loads
+(advice-add 'load-theme :after #'my/sync-ansi-colors-with-theme)
+
 (load-theme 'leuven-dark t)
 
 
