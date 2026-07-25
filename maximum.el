@@ -199,66 +199,215 @@
     (set-face-attribute 'default nil        :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
     (set-face-attribute 'fixed-pitch nil    :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
     (set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
-    (set-face-attribute 'completions-annotations nil :slant 'normal)
-    (set-face-attribute 'completions-common-part nil :slant 'normal)
 )
 
-(defun onemacs-load-theme (themes)
-    "disable current themes and load THEME cleanly"
-    (interactive
-    (list (intern (completing-read
-        "Theme: "
-        (custom-available-themes)
-    )
-    )
-    )
-    )
+;; (defun onemacs-load-theme (themes)
+;;     "disable current themes and load THEME cleanly"
+;;     (interactive
+;;     (list (intern (completing-read
+;;         "Theme: "
+;;         (custom-available-themes)
+;;     )
+;;     )
+;;     )
+;;     )
 
-    (mapc 'disable-theme custom-enabled-themes)
-    (load-theme themes t)
-    (onemacs-apply-fonts)
-)
+;;     (mapc 'disable-theme custom-enabled-themes)
+;;     (load-theme themes t)
+;;     (onemacs-apply-fonts)
+;; )
+
+;; ;; @check TODO - done by AI
+;; (use-package vscode-dark-plus-theme
+;;     :ensure t
+;;     :config
+;;     (require 'color)
+;;     (require 'whitespace)
+
+;;     (defun onncera-vscode-dark-plus-whitespace-faces (theme)
+;;         "apply subtle/error whitespace faces but only for vscode-dark-plus"
+;;         (when (eq theme 'vscode-dark-plus)
+;;             (let* ((bg (face-attribute 'default :background))
+;;                       (subtle (color-lighten-name bg 40))  ;; higher number == more visible - vice versa
+;;                       (warn-color (face-attribute 'error :foreground)))
+
+;;                 ;; normal visible whitespace (subtle)
+;;                 (dolist (face '(
+;;                                    whitespace-space
+;;                                    whitespace-hspace
+;;                                    whitespace-newline
+;;                                    whitespace-tab))
+;;                     (set-face-attribute face nil
+;;                         :foreground subtle
+;;                         :background 'unspecified
+;;                         :weight     'normal))
+
+;;                 ;; WHITESPACE ERRORS
+;;                 (dolist (face '(
+;;                                    whitespace-trailing
+;;                                    whitespace-indentation
+;;                                    whitespace-space-before-tab
+;;                                    whitespace-space-after-tab
+;;                                    whitespace-empty))
+;;                     (set-face-attribute face nil
+;;                         :background warn-color
+;;                         :foreground warn-color
+;;                         :weight 'bold
+;;                         :extend t)))))
+
+;;     (add-hook 'enable-theme-functions 'onncera-vscode-dark-plus-whitespace-faces)
+;;     (onemacs-load-theme 'vscode-dark-plus))
+
 
 ;; @check TODO - done by AI
-(use-package vscode-dark-plus-theme
-    :ensure t
-    :config
-    (require 'color)
-    (require 'whitespace)
+(require 'color)
+(require 'whitespace)
+(require 'term)
+(defun onncera-defer-subtle-whitespace (&rest _args)
+    "defer subtle whitespace application until after theme fully settles"
+    (run-at-time 0 nil 'onncera-apply-subtle-whitespace))
 
-    (defun onncera-vscode-dark-plus-whitespace-faces (theme)
-        "apply subtle/error whitespace faces but only for vscode-dark-plus"
-        (when (eq theme 'vscode-dark-plus)
-            (let* ((bg (face-attribute 'default :background))
-                      (subtle (color-lighten-name bg 40))  ;; higher number == more visible - vice versa
-                      (warn-color (face-attribute 'error :foreground)))
+(defun onncera-apply-subtle-whitespace ()
+    "apply subtle whitespace faces after any theme is loaded"
+    (let* (
+              (bg        (face-attribute 'default :background nil t))
+              (shadow-fg (face-attribute 'shadow  :foreground nil t))
+              (subtle    (let* (
+                  (shadow-usable (and shadow-fg
+                      (not (eq shadow-fg 'unspecified))
+                      (not (eq bg 'unspecified))))
+                  (blended (when shadow-usable
+                      (apply #'color-rgb-to-hex
+                          (color-blend
+                              (color-name-to-rgb bg)
+                              (color-name-to-rgb shadow-fg)
+                                  0.8))))  ;; NOTE - higher the number == the more subtle - vice versa
+                         )
+                  (or blended
+                      (if (eq (frame-parameter nil 'background-mode) 'dark)
+                          (color-lighten-name bg 12)  ;; this is the fallback for themes with no shadow face
+                          (color-darken-name  bg 12)))))
+              (warn-fg   (let ((c (face-attribute 'error :foreground nil t)))
+                             (if (and c (not (eq c 'unspecified))) c "red")))
+              )
 
-                ;; normal visible whitespace (subtle)
-                (dolist (face '(
-                                   whitespace-space
-                                   whitespace-hspace
-                                   whitespace-newline
-                                   whitespace-tab))
-                    (set-face-attribute face nil
-                        :foreground subtle
-                        :background 'unspecified
-                        :weight     'normal))
+        ;; standard whitespace — spaces, tabs, newlines — subtle and unobtrusive
+        (dolist (face '(
+                           whitespace-space
+                           whitespace-hspace
+                           whitespace-newline
+                           whitespace-tab
+                           whitespace-line))
+            (set-face-attribute face nil
+                :foreground subtle
+                :background 'unspecified
+                :weight     'normal
+                :slant      'normal))
 
-                ;; WHITESPACE ERRORS
-                (dolist (face '(
-                                   whitespace-trailing
-                                   whitespace-indentation
-                                   whitespace-space-before-tab
-                                   whitespace-space-after-tab
-                                   whitespace-empty))
-                    (set-face-attribute face nil
-                        :background warn-color
-                        :foreground warn-color
-                        :weight 'bold
-                        :extend t)))))
+    ;; problematic whitespace — trailing, bad indents — clear warning colour
+        (dolist (face '(
+                           whitespace-trailing
+                           whitespace-indentation
+                           whitespace-space-before-tab
+                           whitespace-space-after-tab
+                           whitespace-empty))
+            (set-face-attribute face nil
+                :background warn-fg
+                :foreground bg
+                :weight     'bold
+                :extend     t))))
 
-    (add-hook 'enable-theme-functions 'onncera-vscode-dark-plus-whitespace-faces)
-    (onemacs-load-theme 'vscode-dark-plus))
+(advice-add 'load-theme   :after 'onncera-defer-subtle-whitespace)
+(advice-add 'enable-theme :after 'onncera-defer-subtle-whitespace)
+
+
+(defun onncera-sync-ansi-colors-with-theme (&rest _args)
+    "Map ANSI terminal colors to theme faces with guaranteed contrast"
+    (run-at-time 0 nil 'onncera--do-sync-ansi-colors))
+
+(defun onncera--do-sync-ansi-colors ()
+    (let* (
+              (bg      (face-attribute 'default :background nil t))
+              (fg      (face-attribute 'default :foreground nil t))
+              (dark-p  (eq (frame-parameter nil 'background-mode) 'dark))
+
+              ;; helper — blends a colour away from bg to ensure it's never invisible
+              (readable (lambda (color fallback)
+                            (if (or (not color) (eq color 'unspecified))
+                                fallback
+              ;; blend 15% toward fg — enough to guarantee contrast without
+              ;; destroying the colour. raise toward 0.3 if still too subtle
+              (apply #'color-rgb-to-hex
+                  (color-blend
+                      (color-name-to-rgb fg)
+                      (color-name-to-rgb color)
+                      0.15)))))  ;; THIS NUMBER controls contrast guarantee
+              ;; 0.0  = use colour as-is (no protection)
+              ;; 0.15 = slight nudge toward fg (recommended)
+              ;; 0.3  = stronger nudge, colours look more uniform
+              (err     (face-attribute 'error                   :foreground nil t))
+              (warn    (face-attribute 'warning                 :foreground nil t))
+              (succ    (face-attribute 'success                 :foreground nil t))
+              (keyword (face-attribute 'font-lock-keyword-face  :foreground nil t))
+              (const   (face-attribute 'font-lock-constant-face :foreground nil t))
+              (type    (face-attribute 'font-lock-type-face     :foreground nil t))
+              (shadow  (face-attribute 'shadow                  :foreground nil t))
+          )
+
+        ;; white = default fg (always readable by definition)
+        (set-face-attribute 'term-color-white nil :foreground fg :background fg)
+
+        ;; black = shadow nudged toward fg so it's never invisible on light themes
+        (set-face-attribute 'term-color-black nil
+            :foreground (funcall readable
+                            (if (eq shadow 'unspecified) nil shadow)
+                            (if dark-p "gray40" "gray60"))  ;; fallback grays chosen to be visible on both light and dark
+            :background bg)
+
+        ;; semantic colours — all nudged toward fg for contrast guarantee
+        (set-face-attribute 'term-color-red     nil
+            :foreground (funcall readable err     (if dark-p "#ff6666" "#cc0000"))
+            :background bg)
+        (set-face-attribute 'term-color-green   nil
+            :foreground (funcall readable succ    (if dark-p "#66ff66" "#006600"))
+            :background bg)
+        (set-face-attribute 'term-color-yellow  nil
+            :foreground (funcall readable warn    (if dark-p "#ffdd66" "#886600"))
+            :background bg)
+        (set-face-attribute 'term-color-blue    nil
+            :foreground (funcall readable keyword (if dark-p "#6699ff" "#0000cc"))
+            :background bg)
+        (set-face-attribute 'term-color-magenta nil
+            :foreground (funcall readable const   (if dark-p "#ff66ff" "#880088"))
+            :background bg)
+        (set-face-attribute 'term-color-cyan    nil
+            :foreground (funcall readable type    (if dark-p "#66ffff" "#006666"))
+            :background bg)
+
+        ;; bright variants — same colours but blended harder toward fg
+        (dolist (pair '(
+                           (term-color-bright-red     . "#ff4444")
+                           (term-color-bright-green   . "#44ff44")
+                           (term-color-bright-yellow  . "#ffff44")
+                           (term-color-bright-blue    . "#4444ff")
+                           (term-color-bright-magenta . "#ff44ff")
+                           (term-color-bright-cyan    . "#44ffff")
+                           (term-color-bright-white   . fg)
+                           (term-color-bright-black   . "gray50")))
+            (set-face-attribute (car pair) nil
+            :foreground (if (eq (cdr pair) 'fg)
+                            fg
+                            (apply #'color-rgb-to-hex
+                                (color-blend
+                                    (color-name-to-rgb fg)
+                                    (color-name-to-rgb (cdr pair))
+                                    0.1)))
+            :background bg))))
+
+(advice-add 'load-theme   :after 'onncera-sync-ansi-colors-with-theme)
+(advice-add 'enable-theme :after 'onncera-sync-ansi-colors-with-theme)
+
+(load-theme 'adwaita t)
 
 
 ;; ==============================================================================================================
