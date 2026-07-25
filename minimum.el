@@ -156,50 +156,72 @@
 (set-face-attribute 'fixed-pitch nil    :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
 (set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
 
+(use-package hyperstitional-themes   :vc (:url "https://github.com/precompute/hyperstitional-themes" :rev :newest))
+(use-package sculpture-themes        :vc (:url "https://github.com/precompute/sculpture-themes"      :rev :newest))
+(use-package avk-emacs-themes        :vc (:url "https://github.com/avkoval/avk-emacs-themes"         :rev :newest))
+
+
 ;; @check TODO - done by AI
 (require 'color)
 (require 'whitespace)
 (require 'term)
-(defun onncera-apply-subtle-whitespace (&rest _args)
-    "subtle whitespace faces after any theme is loaded"
-    (let* ((bg (face-attribute 'default :background nil t))
-           (fg (face-attribute 'default :foreground nil t))
-           ;; Grab the theme's builtin muted 'shadow' face color
-           (shadow-fg (face-attribute 'shadow :foreground nil t))
-           ;; Fallback color math if shadow face isn't set by the theme
-           (subtle (if (and shadow-fg (not (eq shadow-fg 'unspecified)))
-                       shadow-fg
-                   (if (eq (frame-parameter nil 'background-mode) 'dark)
-                       (color-lighten-name bg 12)
-                     (color-darken-name bg 12))))
-           (warn-fg (or (face-attribute 'error :foreground nil t) "red")))
+(defun onncera-defer-subtle-whitespace (&rest _args)
+    "defer subtle whitespace application until after theme fully settles"
+    (run-at-time 0 nil 'onncera-apply-subtle-whitespace))
 
-    ;; 1. Standard whitespace (spaces, tabs, newlines) -> Subtle & no background box
-    (dolist (face '(whitespace-space
-                    whitespace-hspace
-                    whitespace-newline
-                    whitespace-tab
-                    whitespace-line))
-        (set-face-attribute face nil
-            :foreground subtle
-            :background 'unspecified
-            :weight     'normal
-            :slant      'normal))
+(defun onncera-apply-subtle-whitespace ()
+    "apply subtle whitespace faces after any theme is loaded"
+    (let* (
+              (bg        (face-attribute 'default :background nil t))
+              (shadow-fg (face-attribute 'shadow  :foreground nil t))
+              (subtle    (let* (
+                  (shadow-usable (and shadow-fg
+                      (not (eq shadow-fg 'unspecified))
+                      (not (eq bg 'unspecified))))
+                  (blended (when shadow-usable
+                      (apply #'color-rgb-to-hex
+                          (color-blend
+                              (color-name-to-rgb bg)
+                              (color-name-to-rgb shadow-fg)
+                                  0.8))))  ;; NOTE - higher the number == the more subtle - vice versa
+                         )
+                  (or blended
+                      (if (eq (frame-parameter nil 'background-mode) 'dark)
+                          (color-lighten-name bg 12)  ;; this is the fallback for themes with no shadow face
+                          (color-darken-name  bg 12)))))
+              (warn-fg   (let ((c (face-attribute 'error :foreground nil t)))
+                             (if (and c (not (eq c 'unspecified))) c "red")))
+              )
 
-    ;; 2. Problematic whitespace (trailing spaces, bad indents) -> Clear warning
-    (dolist (face '(whitespace-trailing
-                    whitespace-indentation
-                    whitespace-space-before-tab
-                    whitespace-space-after-tab
-                    whitespace-empty))
-        (set-face-attribute face nil
-            :background warn-fg
-            :foreground bg
-            :weight     'bold
-            :extend     t))))
+        ;; standard whitespace — spaces, tabs, newlines — subtle and unobtrusive
+        (dolist (face '(
+                           whitespace-space
+                           whitespace-hspace
+                           whitespace-newline
+                           whitespace-tab
+                           whitespace-line))
+            (set-face-attribute face nil
+                :foreground subtle
+                :background 'unspecified
+                :weight     'normal
+                :slant      'normal))
 
-;; run automatically after any theme is loaded
-(advice-add 'load-theme :after 'onncera-apply-subtle-whitespace)
+    ;; problematic whitespace — trailing, bad indents — clear warning colour
+        (dolist (face '(
+                           whitespace-trailing
+                           whitespace-indentation
+                           whitespace-space-before-tab
+                           whitespace-space-after-tab
+                           whitespace-empty))
+            (set-face-attribute face nil
+                :background warn-fg
+                :foreground bg
+                :weight     'bold
+                :extend     t))))
+
+(advice-add 'load-theme   :after 'onncera-defer-subtle-whitespace)
+(advice-add 'enable-theme :after 'onncera-defer-subtle-whitespace)
+
 
 ;; @check TODO - done by AI
 (defun onncera-sync-ansi-colors-with-theme (&rest _args)
