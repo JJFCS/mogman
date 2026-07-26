@@ -59,6 +59,7 @@
 (setq kill-do-not-save-duplicates t)
 (setq global-auto-revert-non-file-buffers t)    ;; auto revert non-file buffers (e.g. dired)
 (setq display-line-numbers-type 'relative)
+(setq completions-detailed t)                   ;; annotations (marginalia replacement)
 (setq redisplay-skip-fontification-on-input t)  ;; skip fontification during input (from doom emacs)
 (setq set-mark-command-repeat-pop t)            ;; after C-u C-SPC , keep popping the mark ring with just C-SPC instead of having to repeat the C-u prefix each time
 (setq savehist-additional-variables '(search-ring regexp-search-ring kill-ring))
@@ -155,6 +156,7 @@
 (set-face-attribute 'default nil        :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
 (set-face-attribute 'fixed-pitch nil    :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
 (set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
+(set-face-attribute 'italic nil :slant 'normal)
 
 (load-theme 'modus-operandi-tinted t)
 
@@ -170,17 +172,41 @@
 (use-package helm-describe-modes :ensure t :defer t)
 (use-package helm
     :ensure t
-    :commands (helm-imenu)
-    :config
-    (require 'helm-buffers)
-    (require 'helm-imenu)
-    (setq helm-imenu-delimiter " = ")
+    :demand t
+
+    :init
+    (setq helm-completion-style 'helm)
     (setq helm-split-window-default-side 'right)
-    (setq helm-split-window-inside-p t)  ;; split inside the active window rather than the entire frame
+    (setq helm-imenu-delimiter " = ")
+    (setq helm-idle-delay 0.0)
+    (setq helm-input-idle-delay 0.05)
+    (setq helm-split-window-inside-p nil)  ;; NOTE - experiment - not sure if I like
+    (setq helm-quick-update t)  ;; do not bother rendering candidates currently scrolled off screen
+
+    (setq
+        helm-mode-fuzzy-match t helm-semantic-fuzzy-match t helm-imenu-fuzzy-match t helm-buffers-fuzzy-matching t
+        helm-completion-in-region-fuzzy-match t helm-M-x-fuzzy-match t helm-locate-fuzzy-match t)
+
+    (setq helm-M-x-requires-pattern nil)  ;; does not force you to type at least one char before M-x shows results
+    (setq helm-move-to-line-cycle-in-source t)  ;; pressing down on the last candidate wraps to the first
+    (setq helm-buffer-max-length 40)  ;; truncate long buffer names in the buffer list column
+
+    :config
+    (helm-mode 1)
+    (define-key helm-map (kbd "C-SPC") 'helm-toggle-visible-mark)  ;; marks or unmarks at point candidate - good for commands that operate on multiple items
+
     :bind (:map helm-map
         ("TAB" . helm-execute-persistent-action)
         ("C-j" . helm-select-action)
     )
+)
+
+(use-package helm-ag    :ensure t :after helm)
+(use-package helm-swoop :ensure t :after helm
+    :config
+    (setq helm-swoop-split-with-multiple-windows t)  ;; NOTE - not sure if I like this - experiment
+    (setq helm-swoop-split-direction 'split-window-horizontally)
+    (setq helm-multi-swoop-edit-save t)  ;; edits made in a swoop-edit buffer will be saved automatically
 )
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -377,6 +403,11 @@
 (defvar onncera-a-map (make-sparse-keymap) "onncera C-c a prefix")
 (global-set-key (kbd "C-c a") onncera-a-map)
 (define-key onncera-a-map (kbd "t") #'onncera-ansi-term)
+(define-key onncera-a-map (kbd "s") #'helm-swoop)
+(define-key onncera-a-map (kbd "S") #'helm-multi-swoop-all)
+(define-key onncera-a-map (kbd "i") #'helm-swoop)
+;; ^^^ hand isearch's current search term over to helm-swoop mid-search with "C-c a i"
+;; ^^^ and escalate from a swoop to a multi-buffer swoop with "C-c a i" again
 
 ;; example for non builtin commands
 ;; b - (reserved, example only, uncomment + fill in when needed)
@@ -386,8 +417,9 @@
 
 ;; @subtopic-1 remaps
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(global-set-key [remap move-beginning-of-line] #'onncera-smart-beginning-of-line)
-(global-set-key [remap imenu] #'onncera-helm-imenu-right)
+(global-set-key [remap move-beginning-of-line] 'onncera-smart-beginning-of-line)
+(global-set-key [remap switch-to-buffer] 'helm-mini)
+(global-set-key [remap list-buffers] 'helm-buffers-list)
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic-1 reclaiming keys (unset)
@@ -519,8 +551,6 @@
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(global-set-key (kbd "C-,") 'embark-act)
-(global-set-key (kbd "C-.") 'embark-dwim)
 (global-set-key (kbd "M-o") 'other-window)
 
 ;; TODO - seems cool..
