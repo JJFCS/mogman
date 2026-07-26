@@ -156,7 +156,6 @@
 (set-face-attribute 'default nil        :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
 (set-face-attribute 'fixed-pitch nil    :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
 (set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
-(set-face-attribute 'italic nil :slant 'normal)
 
 (load-theme 'modus-operandi-tinted t)
 
@@ -580,4 +579,6 @@
     (setq ediff-window-setup-function 'ediff-setup-windows-plain)
 )
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(set-face-attribute 'italic nil :slant 'normal)  ;; this line has to be ran the last
 
