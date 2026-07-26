@@ -142,7 +142,7 @@
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; @check TODO - done by AI
 (defvar onncera-term-shell "/bin/bash" "The default shell path used for custom terminal commands")
-(defun onncera-ansi-term ()
+(defun ansi-terminal ()
     "Launch 'ansi-term' instantly using 'onncera-term-shell' without prompting"
     (interactive)
     (ansi-term onncera-term-shell)
@@ -179,7 +179,7 @@
     (setq helm-split-window-default-side 'right)
     (setq helm-imenu-delimiter " = ")
     (setq helm-idle-delay 0.0)
-    (setq helm-input-idle-delay 0.05)
+    (setq helm-input-idle-delay 0.01)
     (setq helm-split-window-inside-p nil)  ;; NOTE - experiment - not sure if I like
     (setq helm-quick-update t)  ;; do not bother rendering candidates currently scrolled off screen
 
@@ -199,14 +199,6 @@
         ("TAB" . helm-execute-persistent-action)
         ("C-j" . helm-select-action)
     )
-)
-
-(use-package helm-ag    :ensure t :after helm)
-(use-package helm-swoop :ensure t :after helm
-    :config
-    (setq helm-swoop-split-with-multiple-windows t)  ;; NOTE - not sure if I like this - experiment
-    (setq helm-swoop-split-direction 'split-window-horizontally)
-    (setq helm-multi-swoop-edit-save t)  ;; edits made in a swoop-edit buffer will be saved automatically
 )
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -399,15 +391,15 @@
 
 ;; @subtopic-1 a-map
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define-key isearch-mode-map (kbd "M-h") #'helm-occur-from-isearch)        ;; hand off current search term to helm-occur
+(define-key isearch-mode-map (kbd "M-H") #'helm-multi-occur-from-isearch)  ;; same, but multi-buffer
+
 ;; @check TODO - done by AI
 (defvar onncera-a-map (make-sparse-keymap) "onncera C-c a prefix")
 (global-set-key (kbd "C-c a") onncera-a-map)
-(define-key onncera-a-map (kbd "t") #'onncera-ansi-term)
-(define-key onncera-a-map (kbd "s") #'helm-swoop)
-(define-key onncera-a-map (kbd "S") #'helm-multi-swoop-all)
-(define-key onncera-a-map (kbd "i") #'helm-swoop)
-;; ^^^ hand isearch's current search term over to helm-swoop mid-search with "C-c a i"
-;; ^^^ and escalate from a swoop to a multi-buffer swoop with "C-c a i" again
+(define-key onncera-a-map (kbd "s") #'helm-occur)
+(define-key onncera-a-map (kbd "S") #'helm-multi-occur)
+(define-key onncera-a-map (kbd "t") #'ansi-terminal)
 
 ;; example for non builtin commands
 ;; b - (reserved, example only, uncomment + fill in when needed)
