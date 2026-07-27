@@ -141,12 +141,32 @@
 
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; @check TODO - done by AI
-(defvar onncera-term-shell "/bin/bash" "The default shell path used for custom terminal commands")
-(defun ansi-terminal ()
-    "Launch 'ansi-term' instantly using 'onncera-term-shell' without prompting"
+(defvar onncera-term-shell "/bin/bash" "the default shell for onncera ansi-term commands")
+(defvar onncera-ansi-term-buffer-name "*onncera-term*" "name of the single ansi-term buffer")
+(defun  onncera-toggle-ansi-term ()
+    "open or switch to a single ansi-term buffer.
+     if terminal already exists, switch to it and cd to current file's directory.
+     if not, create one at current file's directory."
     (interactive)
-    (ansi-term onncera-term-shell)
-)
+    (let* (
+              (existing (get-buffer onncera-ansi-term-buffer-name))
+              (dir      (or (and buffer-file-name
+                                (file-name-directory buffer-file-name))
+                            default-directory))
+              )
+        (if (and existing (buffer-live-p existing))
+            (progn
+            (switch-to-buffer existing)
+            (term-send-string
+                (get-buffer-process existing)
+                (format "cd %s\n" (shell-quote-argument dir))))
+            (let ((default-directory dir))
+            (ansi-term onncera-term-shell)
+            (rename-buffer onncera-ansi-term-buffer-name t)))))
+
+(defun  onncera-create-ansi-term () "Launch 'ansi-term' instantly using 'onncera-term-shell' without prompting"
+    (interactive)
+    (ansi-term onncera-term-shell))
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -398,7 +418,8 @@
 (global-set-key (kbd "C-c a") onncera-a-map)
 (define-key onncera-a-map (kbd "s") #'helm-occur)
 (define-key onncera-a-map (kbd "S") #'helm-multi-occur)
-(define-key onncera-a-map (kbd "t") #'ansi-terminal)
+(define-key onncera-a-map (kbd "t") #'onncera-toggle-ansi-term)
+(define-key onncera-a-map (kbd "T") #'onncera-create-ansi-term)
 
 ;; example for non builtin commands
 ;; b - (reserved, example only, uncomment + fill in when needed)
