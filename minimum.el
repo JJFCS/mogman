@@ -184,43 +184,6 @@
 ;; @topic COMPLETIONS / MINIBUFFER
 ;; ==============================================================================================================
 
-;; @subtopic-1 HELM
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; - NOTE: C-o does the toggling in helm-mode
-;; - TODO: INCLUDE THE FOLLOWING MODULES === HELM-PROJECTILE, HELM-SWOOP, helm-M-x-show-short-doc
-(use-package helm-describe-modes :ensure t :defer t)
-(use-package helm
-    :ensure t
-    :demand t
-
-    :init
-    (setq helm-completion-style 'helm)
-    (setq helm-split-window-default-side 'right)
-    (setq helm-imenu-delimiter " = ")
-    (setq helm-idle-delay 0.0)
-    (setq helm-input-idle-delay 0.01)
-    (setq helm-split-window-inside-p nil)  ;; NOTE - experiment - not sure if I like
-    (setq helm-quick-update t)  ;; do not bother rendering candidates currently scrolled off screen
-
-    (setq
-        helm-mode-fuzzy-match t helm-semantic-fuzzy-match t helm-imenu-fuzzy-match t helm-buffers-fuzzy-matching t
-        helm-completion-in-region-fuzzy-match t helm-M-x-fuzzy-match t helm-locate-fuzzy-match t)
-
-    (setq helm-M-x-requires-pattern nil)  ;; does not force you to type at least one char before M-x shows results
-    (setq helm-move-to-line-cycle-in-source t)  ;; pressing down on the last candidate wraps to the first
-    (setq helm-buffer-max-length 40)  ;; truncate long buffer names in the buffer list column
-
-    :config
-    (helm-mode 1)
-    (define-key helm-map (kbd "C-SPC") 'helm-toggle-visible-mark)  ;; marks or unmarks at point candidate - good for commands that operate on multiple items
-
-    :bind (:map helm-map
-        ("TAB" . helm-execute-persistent-action)
-        ("C-j" . helm-select-action)
-    )
-)
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 ;; @subtopic-1 ORDERLESS
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package orderless  :ensure t
@@ -295,6 +258,12 @@
     :config
     (setcdr javelin-minor-mode-map nil)  ;; remove all default keybindings
     (global-javelin-minor-mode))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic-1 IMENU
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package imenu
+    :config (setq imenu-auto-rescan t) (setq imenu-level-separator "/") (setq imenu-max-item-no-type 0))
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic-1 MULTIPLE CURSORS
@@ -410,14 +379,10 @@
 
 ;; @subtopic-1 a-map
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define-key isearch-mode-map (kbd "M-h") #'helm-occur-from-isearch)        ;; hand off current search term to helm-occur
-(define-key isearch-mode-map (kbd "M-H") #'helm-multi-occur-from-isearch)  ;; same, but multi-buffer
-
 ;; @check TODO - done by AI
 (defvar onncera-a-map (make-sparse-keymap) "onncera C-c a prefix")
 (global-set-key (kbd "C-c a") onncera-a-map)
-(define-key onncera-a-map (kbd "s") #'helm-occur)
-(define-key onncera-a-map (kbd "S") #'helm-multi-occur)
+(define-key onncera-a-map (kbd "i") #'imenu)
 (define-key onncera-a-map (kbd "t") #'onncera-toggle-ansi-term)
 (define-key onncera-a-map (kbd "T") #'onncera-create-ansi-term)
 
@@ -430,8 +395,6 @@
 ;; @subtopic-1 remaps
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (global-set-key [remap move-beginning-of-line] 'onncera-smart-beginning-of-line)
-(global-set-key [remap switch-to-buffer] 'helm-mini)
-(global-set-key [remap list-buffers] 'helm-buffers-list)
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic-1 reclaiming keys (unset)
