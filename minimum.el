@@ -49,8 +49,6 @@
 (add-to-list 'exec-path "/opt/homebrew/bin")
 (add-to-list 'default-frame-alist '(fullscreen . fullboth))
 
-(fido-mode 1)
-
 ;; NOTE - for variables we use 't' or 'nil'
 ;; NOTE - for functions we use numbers (1 == enabled , 0 == disabled , no number means toggle)
 (setq inhibit-splash-screen t)
@@ -185,6 +183,17 @@
 ;; ==============================================================================================================
 ;; @topic COMPLETIONS / MINIBUFFER
 ;; ==============================================================================================================
+
+;; @subtopic-1 FIDO
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(fido-mode 1)
+
+;; prepend spaces between typed text and the candidate list
+(define-advice icomplete-completions (:filter-return (str) onncera-icomplete-padding)
+    "prepend breathing room before horizontal completion candidates"
+    (when (and (stringp str) (not (string-prefix-p " " str)))
+        (concat "     " str)))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic-1 ORDERLESS
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
