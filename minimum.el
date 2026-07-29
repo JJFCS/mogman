@@ -552,7 +552,8 @@
 
 ;; @subtopic-1 QOL (https://protesilaos.com/codelog/2026-04-30-emacs-decent-default-sacha-chua/)
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package dired :config (setq delete-by-moving-to-trash t))
+(use-package dired
+    :config (setq delete-by-moving-to-trash t))
 (use-package ediff
     :config
     (setq ediff-split-window-function 'split-window-horizontally)
