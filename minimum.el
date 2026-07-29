@@ -187,8 +187,6 @@
 ;; @subtopic-1 FIDO
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (fido-mode 1)
-
-;; prepend spaces between typed text and the candidate list
 (define-advice icomplete-completions (:filter-return (str) onncera-icomplete-padding)
     "prepend breathing room before horizontal completion candidates"
     (when (and (stringp str) (not (string-prefix-p " " str)))
@@ -325,23 +323,6 @@
     )
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; @subtopic-1 SET & FORGET
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package keycast
-    :ensure t
-    :config
-    (keycast-tab-bar-mode)
-    (setq keycast-window-predicate 'always)
-    (setq keycast-substitute-alist '()))
-
-(use-package which-key
-    :config
-    (setq which-key-show-early-on-C-h t)
-    (setq which-key-idle-delay 1e6)
-    (setq which-key-idle-secondary-delay 0.05)
-    (which-key-mode))
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 
 ;; ==============================================================================================================
 ;; @topic HOOKS
@@ -387,6 +368,20 @@
 ;; super cool and important commands/keybindings:
 ;; > view-lossage            (C-h l)
 ;; > view-echo-area-messages (C-h e)
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package keycast
+    :ensure t
+    :config
+    (keycast-tab-bar-mode) (setq keycast-window-predicate 'always) (setq keycast-substitute-alist '()))
+
+(use-package which-key
+    :config
+    (setq which-key-show-early-on-C-h t)
+    (setq which-key-idle-delay 1e6)
+    (setq which-key-idle-secondary-delay 0.05)
+    (which-key-mode))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic-1 a-map
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -538,12 +533,6 @@
 
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (global-set-key (kbd "M-o") 'other-window)
-
-;; TODO - seems cool..
-;; (global-set-key (kbd "M-p") (lambda () (interactive) (previous-logical-line) (recenter)))
-;; (global-set-key (kbd "M-n") (lambda () (interactive) (next-logical-line)     (recenter)))
-;; (global-set-key (kbd "M-[") (lambda () (interactive) (backward-paragraph)    (recenter)))
-;; (global-set-key (kbd "M-]") (lambda () (interactive) (forward-paragraph)     (recenter)))
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; separated into blocks so we can visualise better
@@ -554,26 +543,21 @@
 ;; @topic TESTING PLAYGROUND
 ;; ==============================================================================================================
 
-;; @subtopic-1 EDIFF
+;; @subtopic-1 TESTS
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; taken from prot (https://protesilaos.com/codelog/2026-04-30-emacs-decent-default-sacha-chua/)
+;; > flex  (https://github.com/kn66/flex-x)
+;; > flash (https://github.com/Prgebish/flash)
+;; > yuta  (https://github.com/zenitsu7772000/yuta.el)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic-1 QOL (https://protesilaos.com/codelog/2026-04-30-emacs-decent-default-sacha-chua/)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package dired :config (setq delete-by-moving-to-trash t)
 (use-package ediff
     :config
     (setq ediff-split-window-function 'split-window-horizontally)
     (setq ediff-window-setup-function 'ediff-setup-windows-plain)
 )
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; @subtopic-1 DIRED
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; taken from prot (https://protesilaos.com/codelog/2026-04-30-emacs-decent-default-sacha-chua/)
-(use-package dired
-    :config
-    (setq delete-by-moving-to-trash t) (setq dired-create-destination-dirs-on-trailing-dirsep t))
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; @subtopic-1 SCOUT
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package isearch
     :config
     (setq isearch-lazy-count t)
