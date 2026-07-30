@@ -186,6 +186,7 @@
 
 ;; @subtopic-1 FIDO
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; TODO - do not cut the word short when there is a match & when there is a 'Matched' , highlight the word in red
 (fido-mode 1)
 (define-advice icomplete-completions (:filter-return (str) onncera-icomplete-padding)
     "prepend breathing room before horizontal completion candidates"
@@ -256,7 +257,6 @@
 (use-package avy           :ensure t :defer t)  ;; TODO - swap out for flash?
 (use-package casual        :ensure t :defer t)  ;; TODO - do up a maximalist setup
 (use-package expand-region :ensure t :defer t)
-(use-package goto-chg      :ensure t :defer t)  ;; jump through previous edits (+ forward direction)
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic-1 HARPOON
@@ -464,8 +464,8 @@
                        ("<next>"       . move-text-down)            ;; 'page down'
                        ("<home>"       . er/expand-region)          ;; 'home'
                        ("<end>"        . er/contract-region)        ;; 'end'
-                       ("<help>"       . goto-last-change)          ;; 'insert'
-                       ("<deletechar>" . goto-last-change-reverse)  ;; 'delete'
+                       ("<help>"       . git-gutter:previous-hunk)  ;; 'insert'
+                       ("<deletechar>" . git-gutter:next-hunk)      ;; 'delete'
 
                        ;; Future Modified Keys (just uncomment and fill in as you go!)
                        ;; ("C-<home>"  . onncera-custom-command-one)  ;; CTRL + 'home'
@@ -520,11 +520,8 @@
                        ("C-<f14>" . mc/vertical-align-with-space)  ;; NOTE - select a region & add MCs with 'edit-lines' , then move to the end of the line and run this command
                        ("C-<f15>" . mc/edit-lines)
 
-                       ;; version control
-                       ("M-<f9>"  . git-gutter:previous-hunk)
-                       ("M-<f10>" . git-gutter:next-hunk)
-                       ("M-<f11>" . git-gutter:popup-hunk)
-                       ("M-<f12>" . magit-log-buffer-file)
+                       ;; Magit
+                       ("M-<f9>"  . magit-log-buffer-file)
 
                        ))
     (global-set-key (kbd key) cmd))
