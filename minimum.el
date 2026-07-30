@@ -253,11 +253,10 @@
 ;; @subtopic-1 AMALGAMATION
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; NOTE - give packages their own section if they require configuration
-;; TODO - may be some of these can defer
-(use-package avy              :ensure t :defer t)  ;; TODO - swap out for flash?
-(use-package casual           :ensure t :defer t)  ;; TODO - do up a maximalist setup
-(use-package expand-region    :ensure t :defer t)
-(use-package goto-last-change :ensure t :defer t)  ;; TODO - play nice with back-button for navigation
+(use-package avy           :ensure t :defer t)  ;; TODO - swap out for flash?
+(use-package casual        :ensure t :defer t)  ;; TODO - do up a maximalist setup
+(use-package expand-region :ensure t :defer t)
+(use-package goto-chg      :ensure t :defer t)  ;; jump through previous edits (+ forward direction)
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic-1 HARPOON
@@ -461,12 +460,12 @@
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (pcase-dolist (`(,key . ,cmd)
                   '(
-                       ("<prior>"      . move-text-up)         ;; 'page up'
-                       ("<next>"       . move-text-down)       ;; 'page down'
-                       ("<home>"       . er/expand-region)     ;; 'home'
-                       ("<end>"        . er/contract-region)   ;; 'end'
-                       ("<help>"       . goto-last-change)     ;; 'insert'
-                       ("<deletechar>" . pop-to-mark-command)  ;; 'delete'
+                       ("<prior>"      . move-text-up)              ;; 'page up'
+                       ("<next>"       . move-text-down)            ;; 'page down'
+                       ("<home>"       . er/expand-region)          ;; 'home'
+                       ("<end>"        . er/contract-region)        ;; 'end'
+                       ("<help>"       . goto-last-change)          ;; 'insert'
+                       ("<deletechar>" . goto-last-change-reverse)  ;; 'delete'
 
                        ;; Future Modified Keys (just uncomment and fill in as you go!)
                        ;; ("C-<home>"  . onncera-custom-command-one)  ;; CTRL + 'home'
