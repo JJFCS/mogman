@@ -1,4 +1,5 @@
 elpa/
 onemacs-cache/
 custom.el
+config.el
 .DS_Store
