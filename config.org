@@ -67,7 +67,9 @@ LEGEND
 (setq lossage-size 1000)
 (setq locate-command "mdfind")
 (setq kill-do-not-save-duplicates t)
+(setq kill-region-dwim  'emacs-word)
 (setq global-auto-revert-non-file-buffers t)    ;; auto revert non-file buffers (e.g. dired)
+(setq view-lossage-auto-refresh t)              ;; a buffer that shows your real time key presses
 (setq display-line-numbers-type 'relative)
 (setq completions-detailed t)                   ;; annotations (marginalia replacement)
 (setq redisplay-skip-fontification-on-input t)  ;; skip fontification during input (from doom emacs)
@@ -154,13 +156,23 @@ $ function 3
     (ansi-term "/bin/bash"))
 #+end_src
 
+$ function 4 (done by AI) - check!
+#+begin_src emacs-lisp
+(defvar onncera-keycast-replacement "")
+(add-hook 'pre-command-hook
+    (lambda ()
+        (setq onncera-keycast-replacement (format "%s → %s" (key-description (this-command-keys-vector)) this-command))
+        (force-mode-line-update t)))
+(push '(:eval (propertize (format " %s " onncera-keycast-replacement) 'face 'shadow)) mode-line-misc-info)
+#+end_src
+
 ! THEMES & FONTS & APPEARANCES
 #+begin_src emacs-lisp
 (set-face-attribute 'default nil        :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
 (set-face-attribute 'fixed-pitch nil    :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
 (set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
 
-(load-theme 'modus-operandi-tinted t)
+(load-theme 'modus-vivendi-deuteranopia t)
 #+end_src
 
 ! COMPLETIONS & MINIBUFFER
@@ -171,10 +183,6 @@ $ emacs 31 minibuffer
     (setq truncate-lines t))
 
 (use-package minibuffer
-
-    :bind (:map minibuffer-visible-completions-up-down-map
-            ("C-n" . minibuffer-next-completion)
-            ("C-p" . minibuffer-previous-completion))
     :hook (
             (minibuffer-setup . cursor-intangible-mode)
             (minibuffer-setup . onncera-minibuffer-truncate-lines)
@@ -183,14 +191,13 @@ $ emacs 31 minibuffer
     (setq completion-show-help nil)
     (setq completion-show-inline-help nil)  ;; TODO - not sure if I want
     (setq completion-auto-help t)
-    (setq completion-auto-select nil)       ;; do not swap to completions buffer when I hit TAB
+    (setq completion-auto-select t)
     (setq completion-ignore-case t)
     (setq completions-sort 'alphabetical)   ;; could also be 'historical'
     (setq completion-eager-display t)       ;; EMACS 31
     (setq completion-styles '(partial-completion flex initials))
     (setq minibuffer-visible-completions 'up-down)
     (setq minibuffer-depth-indicate-mode t)
-    (setq completions-detailed t)           ;; show useful annotations in various minibuffer prompts
     (setq completions-max-height 15)
     (setq completion-eager-update t)        ;; EMACS 31
     (setq read-buffer-completion-ignore-case t)
@@ -236,6 +243,12 @@ $ TABS & INDENTS & SPACES & WHITESPACES & ETC
 
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 4)
+#+end_src
+
+$ TREE-SITTER
+#+begin_src emacs-lisp
+(setq treesit-auto-install-grammar 'always)  ;; emacs 31
+(setq treesit-enabled-modes t)               ;; emacs 31
 #+end_src
 
 $ GIT & VC & MAGIT & ETC
@@ -309,11 +322,6 @@ $ UNDO & REDO
 > view-echo-area-messages (C-h e)
 $ packages related to keybinds
 #+begin_src emacs-lisp
-(use-package keycast
-    :ensure t
-    :config
-    (keycast-tab-bar-mode) (setq keycast-window-predicate 'always) (setq keycast-substitute-alist '()))  ;; TODO replace with view lossage emacs 31
-
 (use-package which-key
     :config
     (setq which-key-show-early-on-C-h t)
