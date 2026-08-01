@@ -40,7 +40,9 @@
 (setq lossage-size 1000)
 (setq locate-command "mdfind")
 (setq kill-do-not-save-duplicates t)
+(setq kill-region-dwim  'emacs-word)
 (setq global-auto-revert-non-file-buffers t)    ;; auto revert non-file buffers (e.g. dired)
+(setq view-lossage-auto-refresh t)              ;; a buffer that shows your real time key presses
 (setq display-line-numbers-type 'relative)
 (setq completions-detailed t)                   ;; annotations (marginalia replacement)
 (setq redisplay-skip-fontification-on-input t)  ;; skip fontification during input (from doom emacs)
@@ -114,24 +116,45 @@
     (interactive)
     (ansi-term "/bin/bash"))
 
+(defvar onncera-keycast-replacement "")
+(add-hook 'pre-command-hook
+    (lambda ()
+        (setq onncera-keycast-replacement (format "%s → %s" (key-description (this-command-keys-vector)) this-command))
+        (force-mode-line-update t)))
+(push '(:eval (propertize (format " %s " onncera-keycast-replacement) 'face 'shadow)) mode-line-misc-info)
+
 (set-face-attribute 'default nil        :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
 (set-face-attribute 'fixed-pitch nil    :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
 (set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
 
-(load-theme 'modus-operandi-tinted t)
+(load-theme 'modus-vivendi-deuteranopia t)
+
+(defun onncera-minibuffer-truncate-lines () "Keep minibuffer lines unwrapped"
+    (setq truncate-lines t))
 
 (use-package minibuffer
+    :hook (
+            (minibuffer-setup . cursor-intangible-mode)
+            (minibuffer-setup . onncera-minibuffer-truncate-lines)
+        )
     :config
     (setq completion-show-help nil)
-    (setq completion-show-inline-help nil)
-    (setq completions-detailed t)  ;; show useful annotations in various minibuffer prompts
-    (setq completions-max-height 15)
-    (setq completions-sort 'alphabetical)  ;; could also be 'historical'
+    (setq completion-show-inline-help nil)  ;; TODO - not sure if I want
     (setq completion-auto-help t)
-    (setq completion-auto-select nil)  ;; do not swap to completions buffer when I hit TAB
-    (setq minibuffer-visible-completions t)
-    (setq completion-eager-display t)
-    (setq completion-eager-update t))
+    (setq completion-auto-select t)
+    (setq completion-ignore-case t)
+    (setq completions-sort 'alphabetical)   ;; could also be 'historical'
+    (setq completion-eager-display t)       ;; EMACS 31
+    (setq completion-styles '(partial-completion flex initials))
+    (setq minibuffer-visible-completions 'up-down)
+    (setq minibuffer-depth-indicate-mode t)
+    (setq completions-max-height 15)
+    (setq completion-eager-update t)        ;; EMACS 31
+    (setq read-buffer-completion-ignore-case t)
+    (setq read-file-name-completion-ignore-case t)
+    (setq enable-recursive-minibuffers t)
+    (setq tab-always-indent 'complete)
+    (setq minibuffer-prompt-properties '(read-only t intangible t cursor-intangible t face minibuffer-prompt)))
 
 (use-package orderless
     :ensure t
@@ -159,6 +182,9 @@
 
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 4)
+
+(setq treesit-auto-install-grammar 'always)  ;; emacs 31
+(setq treesit-enabled-modes t)               ;; emacs 31
 
 (use-package git-gutter :ensure t :hook (prog-mode . git-gutter-mode))
 (use-package magit      :ensure t :defer t)
@@ -201,11 +227,6 @@
 (add-hook 'prog-mode-hook 'onncera-highlight-todo)
 (add-hook 'prog-mode-hook 'whitespace-mode)
 
-(use-package keycast
-    :ensure t
-    :config
-    (keycast-tab-bar-mode) (setq keycast-window-predicate 'always) (setq keycast-substitute-alist '()))  ;; TODO replace with view lossage emacs 31
-
 (use-package which-key
     :config
     (setq which-key-show-early-on-C-h t)
@@ -216,8 +237,7 @@
 (defvar onncera-a-map (make-sparse-keymap) "onncera C-c a prefix")
 (global-set-key (kbd "C-c a") onncera-a-map)
 (define-key onncera-a-map (kbd "i") #'imenu)
-(define-key onncera-a-map (kbd "t") #'onncera-toggle-ansi-term)
-(define-key onncera-a-map (kbd "T") #'onncera-create-ansi-term)
+(define-key onncera-a-map (kbd "t") #'onncera-create-ansi-term)
 
 (global-set-key (kbd "M-o") 'other-window)
 
