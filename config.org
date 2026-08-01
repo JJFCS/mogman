@@ -167,18 +167,37 @@ $ function 3
 $ emacs 31 minibuffer
 #+begin_src emacs-lisp
 
+(defun onncera-minibuffer-truncate-lines () "Keep minibuffer lines unwrapped"
+    (setq truncate-lines t))
+
 (use-package minibuffer
+
+    :bind (:map minibuffer-visible-completions-up-down-map
+            ("C-n" . minibuffer-next-completion)
+            ("C-p" . minibuffer-previous-completion))
+    :hook (
+            (minibuffer-setup . cursor-intangible-mode)
+            (minibuffer-setup . onncera-minibuffer-truncate-lines)
+        )
     :config
     (setq completion-show-help nil)
-    (setq completion-show-inline-help nil)
-    (setq completions-detailed t)  ;; show useful annotations in various minibuffer prompts
-    (setq completions-max-height 15)
-    (setq completions-sort 'alphabetical)  ;; could also be 'historical'
+    (setq completion-show-inline-help nil)  ;; TODO - not sure if I want
     (setq completion-auto-help t)
-    (setq completion-auto-select nil)  ;; do not swap to completions buffer when I hit TAB
-    (setq minibuffer-visible-completions t)
-    (setq completion-eager-display t)
-    (setq completion-eager-update t))
+    (setq completion-auto-select nil)       ;; do not swap to completions buffer when I hit TAB
+    (setq completion-ignore-case t)
+    (setq completions-sort 'alphabetical)   ;; could also be 'historical'
+    (setq completion-eager-display t)       ;; EMACS 31
+    (setq completion-styles '(partial-completion flex initials))
+    (setq minibuffer-visible-completions 'up-down)
+    (setq minibuffer-depth-indicate-mode t)
+    (setq completions-detailed t)           ;; show useful annotations in various minibuffer prompts
+    (setq completions-max-height 15)
+    (setq completion-eager-update t)        ;; EMACS 31
+    (setq read-buffer-completion-ignore-case t)
+    (setq read-file-name-completion-ignore-case t)
+    (setq enable-recursive-minibuffers t)
+    (setq tab-always-indent 'complete)
+    (setq minibuffer-prompt-properties '(read-only t intangible t cursor-intangible t face minibuffer-prompt))
 
 #+end_src
 
@@ -309,8 +328,7 @@ $ onncera-a-map (done by AI) - check!
 (defvar onncera-a-map (make-sparse-keymap) "onncera C-c a prefix")
 (global-set-key (kbd "C-c a") onncera-a-map)
 (define-key onncera-a-map (kbd "i") #'imenu)
-(define-key onncera-a-map (kbd "t") #'onncera-toggle-ansi-term)
-(define-key onncera-a-map (kbd "T") #'onncera-create-ansi-term)
+(define-key onncera-a-map (kbd "t") #'onncera-create-ansi-term)
 
 (global-set-key (kbd "M-o") 'other-window)
 
