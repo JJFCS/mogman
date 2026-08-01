@@ -120,7 +120,18 @@
 
 (load-theme 'modus-operandi-tinted t)
 
-
+(use-package minibuffer
+    :config
+    (setq completion-show-help nil)
+    (setq completion-show-inline-help nil)
+    (setq completions-detailed t)  ;; show useful annotations in various minibuffer prompts
+    (setq completions-max-height 15)
+    (setq completions-sort 'alphabetical)  ;; could also be 'historical'
+    (setq completion-auto-help t)
+    (setq completion-auto-select nil)  ;; do not swap to completions buffer when I hit TAB
+    (setq minibuffer-visible-completions t)
+    (setq completion-eager-display t)
+    (setq completion-eager-update t))
 
 (use-package orderless
     :ensure t
