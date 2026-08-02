@@ -156,16 +156,6 @@ $ function 3
     (ansi-term "/bin/bash"))
 #+end_src
 
-$ function 4 (done by AI) - check!
-#+begin_src emacs-lisp
-(defvar onncera-keycast-replacement "")
-(add-hook 'pre-command-hook
-    (lambda ()
-        (setq onncera-keycast-replacement (format "%s → %s" (key-description (this-command-keys-vector)) this-command))
-        (force-mode-line-update t)))
-(push '(:eval (propertize (format " %s " onncera-keycast-replacement) 'face 'shadow)) mode-line-misc-info)
-#+end_src
-
 ! THEMES & FONTS & APPEARANCES
 #+begin_src emacs-lisp
 (set-face-attribute 'default nil        :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
