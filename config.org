@@ -185,7 +185,6 @@ $ emacs 31 minibuffer
     (setq completion-ignore-case t)
     (setq completions-sort 'alphabetical)   ;; could also be 'historical'
     (setq completion-eager-display t)       ;; EMACS 31
-    (setq completion-styles '(partial-completion flex initials))
     (setq minibuffer-visible-completions 'up-down)
     (setq minibuffer-depth-indicate-mode t)
     (setq completions-max-height 15)
@@ -203,9 +202,9 @@ $ ORDERLESS
 (use-package orderless
     :ensure t
     :config
-    (setq completion-styles '(orderless basic)
-            )
-)
+    (setq completion-styles '(orderless basic))
+    (setq orderless-matching-styles '(orderless-initialism orderless-prefixes orderless-flex orderless-regexp))
+        )
 #+end_src
 
 $ TODO - asap - create completion & perhaps a minimal LSP setup
@@ -367,6 +366,14 @@ $ unbind F9-F15 [base, C-, M-, S-, C-M-]
     (let ((f-key (format "<f%d>" (+ i 9))))
         (dolist (prefix '("" "C-" "M-" "S-" "C-M-"))
             (global-unset-key (kbd (format "%s%s" prefix f-key))))))
+#+end_src
+
+$ unbind mouse
+#+begin_src emacs-lisp
+(dolist (mouse '(
+    [wheel-up]   [double-wheel-up]   [triple-wheel-up]
+    [wheel-down] [double-wheel-down] [triple-wheel-down]))
+    (global-unset-key mouse))
 #+end_src
 
 ! NAVIGATION
