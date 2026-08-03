@@ -158,11 +158,42 @@ $ function 3
 
 ! THEMES & FONTS & APPEARANCES
 #+begin_src emacs-lisp
+
+;; TODO - Include these themes
+;; > https://github.com/precompute/hyperstitional-themes"
+;; > https://github.com/precompute/sculpture-themes"
+
+(use-package vscode-dark-plus-theme :ensure t :defer t)
+(use-package temple-os-theme        :vc (:url "https://github.com/Senka07/temple-os-emacs-theme"))
+
 (set-face-attribute 'default nil        :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
 (set-face-attribute 'fixed-pitch nil    :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
 (set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
 
-(load-theme 'modus-vivendi-deuteranopia t)
+(advice-add 'load-theme :after (lambda (&rest _)
+    (let* (
+            (something)
+            (bg      (face-attribute 'default :background nil t))
+            (subtle  (color-blend (color-name-to-rgb (face-attribute 'shadow :foreground nil t)) (color-name-to-rgb bg) 0.5))  ;; NOTE - 0.0 == pure shadow, 1.0 == pure bg
+            (warning (face-attribute 'warning :foreground nil t))
+            (error   (face-attribute 'error   :foreground nil t))
+
+            )
+
+        ;; TODO - can experiment with which whitespace setting to move to what category
+
+        (dolist (face '(whitespace-space whitespace-tab whitespace-hspace whitespace-newline whitespace-line))
+            (set-face-attribute face nil :foreground (apply #'color-rgb-to-hex subtle) :background 'unspecified))
+        (dolist (face '(whitespace-empty whitespace-space-after-tab whitespace-indentation))
+            (set-face-attribute face nil :foreground warning :background 'unspecified))
+        (dolist (face '(whitespace-trailing whitespace-space-before-tab))
+            (set-face-attribute face nil :foreground error :background error))
+    )
+                                   )
+    )
+
+(load-theme 'vscode-dark-plus t)
+
 #+end_src
 
 ! COMPLETIONS & MINIBUFFER
