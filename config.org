@@ -163,6 +163,8 @@ $ function 3
 ;; > https://github.com/precompute/hyperstitional-themes"
 ;; > https://github.com/precompute/sculpture-themes"
 
+(require 'whitespace)
+
 (use-package vscode-dark-plus-theme :ensure t :defer t)
 (use-package temple-os-theme        :vc (:url "https://github.com/Senka07/temple-os-emacs-theme"))
 
