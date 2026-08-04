@@ -156,6 +156,26 @@ $ function 3
     (ansi-term "/bin/bash"))
 #+end_src
 
+$ function 4
+#+begin_src emacs-lisp
+
+;; @check TODO - done by AI
+(defun onncera-set-hl-line-color ()
+    "select a color and set it as the hl-line background"
+    (interactive)
+    (require 'facemenu)
+    (let ((color (completing-read
+            "HL-line color: "
+            (defined-colors)
+        )
+        )
+        )
+    (set-face-attribute 'hl-line nil :background color)
+    )
+)
+
+#+end_src
+
 ! THEMES & FONTS & APPEARANCES
 #+begin_src emacs-lisp
 
@@ -171,6 +191,9 @@ $ function 3
 (set-face-attribute 'default nil        :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
 (set-face-attribute 'fixed-pitch nil    :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
 (set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
+
+;; NOTE - some themes do not define faces such as 'shadow', 'warning', 'error', etc.. then this fails..
+;; NOTE - at that point, do not bother using the theme
 
 (advice-add 'load-theme :after (lambda (&rest _)
     (let* (
