@@ -175,27 +175,27 @@ $ emacs 31 minibuffer
     (setq truncate-lines t))
 
 (use-package minibuffer
-    :hook (
-            (minibuffer-setup . cursor-intangible-mode)
-            (minibuffer-setup . onncera-minibuffer-truncate-lines)
-        )
+
+    :hook ((minibuffer-setup . onncera-minibuffer-truncate-lines))
+
     :config
     (setq completion-show-help nil)
-    (setq completion-show-inline-help nil)  ;; TODO - not sure if I want
+    (setq completion-show-inline-help t)
     (setq completion-auto-help t)
-    (setq completion-auto-select t)
+    (setq completion-auto-select nil)
+    (setq completion-eager-display t)
     (setq completion-ignore-case t)
-    (setq completions-sort 'alphabetical)   ;; could also be 'historical'
-    (setq completion-eager-display t)       ;; EMACS 31
+    (setq completions-sort 'alphabetical)  ;; could also be 'historical'
+    (setq completions-format 'one-column)
+    (setq completions-max-height 15)
+    (setq completion-eager-update t)
     (setq minibuffer-visible-completions 'up-down)
     (setq minibuffer-depth-indicate-mode t)
-    (setq completions-max-height 15)
-    (setq completion-eager-update t)        ;; EMACS 31
     (setq read-buffer-completion-ignore-case t)
     (setq read-file-name-completion-ignore-case t)
     (setq enable-recursive-minibuffers t)
     (setq tab-always-indent 'complete)
-    (setq minibuffer-prompt-properties '(read-only t intangible t cursor-intangible t face minibuffer-prompt)))
+    (setq completion-styles '(partial-completion flex initials)))  ;; TODO - not sure if I want to use this or orderless..
 
 #+end_src
 
@@ -234,12 +234,6 @@ $ TABS & INDENTS & SPACES & WHITESPACES & ETC
 
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 4)
-#+end_src
-
-$ TREE-SITTER
-#+begin_src emacs-lisp
-(setq treesit-auto-install-grammar 'always)  ;; emacs 31
-(setq treesit-enabled-modes t)               ;; emacs 31
 #+end_src
 
 $ GIT & VC & MAGIT & ETC
