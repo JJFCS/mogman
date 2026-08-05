@@ -156,6 +156,37 @@ $ function 3
     (ansi-term "/bin/bash"))
 #+end_src
 
+$ function 4
+#+begin_src emacs-lisp
+
+(defun onncera-create-editorconfig ()
+    "create a .editorconfig file in the current project directory"
+    (interactive)
+    (let*
+
+        (
+            (proj (project-current))
+            (dir (if proj (project-root proj) default-directory))
+            (file (expand-file-name ".editorconfig" dir))
+        )
+
+    (if (file-exists-p file)
+        (message "no need create. one exists.")
+        (with-temp-file file
+            (insert
+            "root = true\n"
+            "\n"
+            "[*]\n"
+            "indent_style = space\n"
+            "indent_size  = 4\n"
+            "tab_width    = 4\n"))
+        (message "created %s" file)
+    )
+    )
+)
+
+#+end_src
+
 ! THEMES & FONTS & APPEARANCES
 #+begin_src emacs-lisp
 
@@ -193,7 +224,6 @@ $ emacs 31 minibuffer
     (setq minibuffer-depth-indicate-mode t)
     (setq read-buffer-completion-ignore-case t)
     (setq read-file-name-completion-ignore-case t)
-    (setq enable-recursive-minibuffers t)
     (setq tab-always-indent 'complete)
     (setq completion-styles '(partial-completion flex initials)))  ;; TODO - not sure if I want to use this or orderless..
 
@@ -230,7 +260,7 @@ $ TABS & INDENTS & SPACES & WHITESPACES & ETC
 ;; such as spaces vs tabs, indentation width, whitespace rules, etc.
 ;; It does not control emacs indentation behavior or TAB/RET key actions
 (editorconfig-mode 1)
-(electric-indent-mode 0)
+(electric-indent-mode 1)
 
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 4)
@@ -297,6 +327,7 @@ $ UNDO & REDO
 
 ! HOOKS
 #+begin_src emacs-lisp
+(add-hook 'prog-mode-hook 'editorconfig-apply)
 (add-hook 'prog-mode-hook 'onncera-highlight-todo)
 (add-hook 'prog-mode-hook 'whitespace-mode)
 #+end_src
@@ -320,6 +351,7 @@ $ onncera-a-map (done by AI) - check!
 
 (defvar onncera-a-map (make-sparse-keymap) "onncera C-c a prefix")
 (global-set-key (kbd "C-c a") onncera-a-map)
+(define-key onncera-a-map (kbd "e") #'oncnera-create-editorconfig)
 (define-key onncera-a-map (kbd "i") #'imenu)
 (define-key onncera-a-map (kbd "t") #'onncera-create-ansi-term)
 
