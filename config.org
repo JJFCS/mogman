@@ -251,6 +251,16 @@ $ CONSOLIDATION
 
 #+end_src
 
+$ ORG
+#+begin_src emacs-lisp
+(use-package org-remark
+    :ensure t
+    :config
+    (org-remark-global-tracking-mode 1)  ;; auto saves & restores highlights across emacs sessions
+    (org-remark-create "blue" '(:background "light blue"))
+    (org-remark-create "pink" '(:background "pink")))
+#+end_src
+
 $ HARPOON
 #+begin_src emacs-lisp
 (use-package javelin :ensure t
@@ -320,6 +330,13 @@ $ onncera-a-map (done by AI) - check!
 (global-set-key (kbd "C-c a") onncera-a-map)
 (define-key onncera-a-map (kbd "i") #'imenu)
 (define-key onncera-a-map (kbd "t") #'onncera-create-ansi-term)
+
+(defvar onncera-o-map (make-sparse-keymap) "onncera C-c o prefix")  ;; org mode
+(global-set-key (kbd "C-c o") onncera-o-map)
+(define-key onncera-o-map (kbd "m") #'org-remark-mark)
+(define-key onncera-o-map (kbd "b") #'org-remark-mark-blue)
+(define-key onncera-o-map (kbd "p") #'org-remark-mark-pink)
+(define-key onncera-o-map (kbd "r") #'org-remark-remove)
 
 (global-set-key (kbd "M-o") 'other-window)
 
