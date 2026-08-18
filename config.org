@@ -336,6 +336,7 @@ $ onncera-a-map (done by AI) - check!
 (define-key onncera-o-map (kbd "m") #'org-remark-mark)
 (define-key onncera-o-map (kbd "b") #'org-remark-mark-blue)
 (define-key onncera-o-map (kbd "p") #'org-remark-mark-pink)
+(define-key onncera-o-map (kbd "u") #'org-remark-mark-yellow)
 (define-key onncera-o-map (kbd "r") #'org-remark-remove)
 
 (global-set-key (kbd "M-o") 'other-window)
