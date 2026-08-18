@@ -257,8 +257,8 @@ $ ORG
     :ensure t
     :config
     (org-remark-global-tracking-mode 1)  ;; auto saves & restores highlights across emacs sessions
-    (org-remark-create "blue" '(:background "light blue"))
-    (org-remark-create "pink" '(:background "pink")))
+    (org-remark-create "blue" '(:background "blue"))
+    (org-remark-create "pink" '(:background "deep pink")))
 #+end_src
 
 $ HARPOON
