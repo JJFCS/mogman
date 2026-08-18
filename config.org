@@ -253,12 +253,17 @@ $ CONSOLIDATION
 
 $ ORG
 #+begin_src emacs-lisp
-(use-package org-remark
+
+(setq org-startup-with-inline-images t)
+(setq org-fontify-quote-and-verse-blocks t)  ;; force org to use org-quote face to text inside quote blocks
+
+(use-package org-remark :defer t
     :ensure t
     :config
     (org-remark-global-tracking-mode 1)  ;; auto saves & restores highlights across emacs sessions
     (org-remark-create "blue" '(:background "blue"))
     (org-remark-create "pink" '(:background "deep pink")))
+
 #+end_src
 
 $ HARPOON
