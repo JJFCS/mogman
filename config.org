@@ -165,11 +165,11 @@ $ function 4
 ! THEMES & FONTS & APPEARANCES
 #+begin_src emacs-lisp
 
+(load-theme 'modus-vivendi-deuteranopia t)
+
 (set-face-attribute 'default        nil :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
 (set-face-attribute 'fixed-pitch    nil :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
 (set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
-
-(load-theme 'modus-vivendi-deuteranopia t)
 
 #+end_src
 
@@ -235,9 +235,20 @@ $ CONSOLIDATION
 
 ;; NOTE - give packages their own section if they require configuration
 (use-package avy           :ensure t :defer t)  ;; TODO - swap out for flash?
-(use-package casual        :ensure t :defer t)  ;; TODO - do up a maximalist setup
 (use-package expand-region :ensure t :defer t)
 
+#+end_src
+
+$ CONSULT
+#+begin_src emacs-lisp
+(use-package consult :ensure t
+    :config
+    (setq consult-buffer-filter '("\\` " "\\`\\*")))  ;; hides star (*) buffers - press 'SPC' to see
+
+(with-eval-after-load 'consult
+    (dolist (face (face-list))
+        (when (string-prefix-p "consult-" (symbol-name face))
+            (set-face-attribute face nil :slant 'normal))))  ;; removes italics
 #+end_src
 
 $ ORG
@@ -328,6 +339,7 @@ $ onncera-a-map (done by AI) - check!
 $ remaps
 #+begin_src emacs-lisp
 (global-set-key [remap move-beginning-of-line] 'onncera-smart-beginning-of-line)
+(global-set-key [remap switch-to-buffer] #'consult-buffer)
 #+end_src
 
 ! reclaiming keys
@@ -360,14 +372,6 @@ $ unbind F9-F15 [base, C-, M-, S-, C-M-]
     (let ((f-key (format "<f%d>" (+ i 9))))
         (dolist (prefix '("" "C-" "M-" "S-" "C-M-"))
             (global-unset-key (kbd (format "%s%s" prefix f-key))))))
-#+end_src
-
-$ unbind mouse
-#+begin_src emacs-lisp
-(dolist (mouse '(
-    [wheel-up]   [double-wheel-up]   [triple-wheel-up]
-    [wheel-down] [double-wheel-down] [triple-wheel-down]))
-    (global-unset-key mouse))
 #+end_src
 
 ! NAVIGATION
