@@ -167,6 +167,8 @@ $ function 4
 
 (load-theme 'modus-vivendi-deuteranopia t)
 
+(set-face-attribute 'completions-group-title nil :slant 'normal)
+
 (set-face-attribute 'default        nil :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
 (set-face-attribute 'fixed-pitch    nil :family "MartianMono Nerd Font Mono" :height 140 :width 'condensed :weight 'regular :slant 'normal)
 (set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
@@ -244,11 +246,6 @@ $ CONSULT
 (use-package consult :ensure t
     :config
     (setq consult-buffer-filter '("\\` " "\\`\\*")))  ;; hides star (*) buffers - press 'SPC' to see
-
-(with-eval-after-load 'consult
-    (dolist (face (face-list))
-        (when (string-prefix-p "consult-" (symbol-name face))
-            (set-face-attribute face nil :slant 'normal))))  ;; removes italics
 #+end_src
 
 $ ORG
