@@ -156,6 +156,12 @@ $ function 3
     (ansi-term "/bin/bash"))
 #+end_src
 
+$ function 4
+#+begin_src emacs-lisp
+(defun onncera-insert-dagger () (interactive) (insert "†"))
+(defun onncera-insert-double-dagger () (interactive) (insert "‡"))
+#+end_src
+
 ! THEMES & FONTS & APPEARANCES
 #+begin_src emacs-lisp
 
@@ -181,16 +187,14 @@ $ emacs 31 minibuffer
     :config
     (setq completion-show-help nil)
     (setq completion-show-inline-help t)
-    (setq completion-auto-help t)
     (setq completion-auto-select nil)
     (setq completion-eager-display t)
     (setq completion-ignore-case t)
-    (setq completions-sort 'alphabetical)  ;; could also be 'historical'
+    (setq completions-sort 'alphabetical)  ;; alternative - 'historical'
     (setq completions-format 'one-column)
     (setq completions-max-height 15)
     (setq completion-eager-update t)
-    (setq completion-styles '(partial-completion flex initials))  ;; TODO - THIS VS ORDERLESS
-    (setq minibuffer-visible-completions 'up-down)
+    (setq completion-styles '(partial-completion flex initials))
     (setq minibuffer-depth-indicate-mode t)
     (setq read-file-name-completion-ignore-case t)
     (setq read-buffer-completion-ignore-case t)
@@ -241,8 +245,11 @@ $ ORG
 (setq org-startup-with-inline-images t)
 (setq org-fontify-quote-and-verse-blocks t)  ;; force org to use org-quote face to text inside quote blocks
 
-(font-lock-add-keywords 'org-mode '(("†\\([^†]+\\)†" (1 '(:background "blue"      :foreground "white") t))))
-(font-lock-add-keywords 'org-mode '(("‡\\([^‡]+\\)‡" (1 '(:background "deep pink" :foreground "white") t))))
+(font-lock-add-keywords 'org-mode '(
+    ("†\\([^†]+\\)†" (1 '(:background "blue"      :foreground "white") prepend))
+    ("‡\\([^‡]+\\)‡" (1 '(:background "deep pink" :foreground "white") prepend))
+        )
+    )
 #+end_src
 
 $ IMENU
@@ -369,15 +376,6 @@ $ unbind mouse
 ;; TODO - place this in bashrc (alias emacs="/Applications/Emacs.app/Contents/MacOS/Emacs") - beware renamed applicaton
 ;; so that when we want to have a look at what vanilla
 ;; emacs original keybindings are , you can just run "emacs -Q" in the terminal
-
-;; ORDER
-;; - expand-region
-;; - avy
-;; - Jumping by function
-;; - sexp - balanced expression
-;; - xref
-;; - multiple-cursors
-;; - version control - programming navigation workflow
 
 #+end_src
 
