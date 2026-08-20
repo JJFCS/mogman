@@ -199,21 +199,6 @@ $ emacs 31 minibuffer
 
 #+end_src
 
-$ ORDERLESS
-#+begin_src emacs-lisp
-(use-package orderless
-    :ensure t
-    :config
-    (setq completion-styles '(orderless basic))
-    (setq orderless-matching-styles '(orderless-initialism orderless-prefixes orderless-flex orderless-regexp))
-        )
-#+end_src
-
-$ TODO - asap - create completion & perhaps a minimal LSP setup
-#+begin_src emacs-lisp
-
-#+end_src
-
 ! PROGRAMMING
 $ TABS & INDENTS & SPACES & WHITESPACES & ETC
 #+begin_src emacs-lisp
@@ -253,23 +238,11 @@ $ CONSOLIDATION
 
 $ ORG
 #+begin_src emacs-lisp
-
 (setq org-startup-with-inline-images t)
 (setq org-fontify-quote-and-verse-blocks t)  ;; force org to use org-quote face to text inside quote blocks
 
-(use-package org-remark :defer t
-    :ensure t
-    :config
-    (org-remark-global-tracking-mode 1)  ;; auto saves & restores highlights across emacs sessions
-    (org-remark-create "blue" '(:background "blue"))
-    (org-remark-create "pink" '(:background "deep pink")))
-
-#+end_src
-
-$ HARPOON
-#+begin_src emacs-lisp
-(use-package javelin :ensure t
-    :config (setcdr javelin-minor-mode-map nil) (global-javelin-minor-mode))
+(font-lock-add-keywords 'org-mode '(("†\\([^†]+\\)†" (1 '(:background "blue"      :foreground "white") t))))
+(font-lock-add-keywords 'org-mode '(("‡\\([^‡]+\\)‡" (1 '(:background "deep pink" :foreground "white") t))))
 #+end_src
 
 $ IMENU
@@ -336,13 +309,10 @@ $ onncera-a-map (done by AI) - check!
 (define-key onncera-a-map (kbd "i") #'imenu)
 (define-key onncera-a-map (kbd "t") #'onncera-create-ansi-term)
 
-(defvar onncera-o-map (make-sparse-keymap) "onncera C-c o prefix")  ;; org mode
-(global-set-key (kbd "C-c o") onncera-o-map)
-(define-key onncera-o-map (kbd "m") #'org-remark-mark)
-(define-key onncera-o-map (kbd "b") #'org-remark-mark-blue)
-(define-key onncera-o-map (kbd "p") #'org-remark-mark-pink)
-(define-key onncera-o-map (kbd "u") #'org-remark-mark-yellow)
-(define-key onncera-o-map (kbd "r") #'org-remark-remove)
+(defvar onncera-u-map (make-sparse-keymap) "onncera C-c u prefix")  ;; unicode
+(global-set-key (kbd "C-c u") onncera-u-map)
+(define-key onncera-u-map (kbd "b") #'onncera-insert-dagger)  ;; blue highlights
+(define-key onncera-u-map (kbd "p") #'onncera-insert-double-dagger)  ;; pink highlights
 
 (global-set-key (kbd "M-o") 'other-window)
 
