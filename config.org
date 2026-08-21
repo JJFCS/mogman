@@ -158,8 +158,9 @@ $ function 3
 
 $ function 4
 #+begin_src emacs-lisp
-(defun onncera-insert-dagger () (interactive) (insert "†"))
 (defun onncera-insert-double-dagger () (interactive) (insert "‡"))
+(defun onncera-insert-plus-minus-sign () (interactive) (insert "±"))
+(defun onncera-insert-currency-sign () (interactive) (insert "¤"))
 #+end_src
 
 ! THEMES & FONTS & APPEARANCES
@@ -254,8 +255,9 @@ $ ORG
 (setq org-fontify-quote-and-verse-blocks t)  ;; force org to use org-quote face to text inside quote blocks
 
 (font-lock-add-keywords 'org-mode '(
-    ("†\\([^†]+\\)†" (1 '(:background "blue"      :foreground "white") prepend))
+    ("¤\\([^¤]+\\)¤" (1 '(:background "blue"      :foreground "white") prepend))
     ("‡\\([^‡]+\\)‡" (1 '(:background "deep pink" :foreground "white") prepend))
+    ("±\\([^±]+\\)±" (1 '(:background "goldenrod" :foreground "white") prepend))
         )
     )
 #+end_src
@@ -324,10 +326,11 @@ $ onncera-a-map (done by AI) - check!
 (define-key onncera-a-map (kbd "i") #'imenu)
 (define-key onncera-a-map (kbd "t") #'onncera-create-ansi-term)
 
-(defvar onncera-u-map (make-sparse-keymap) "onncera C-c u prefix")  ;; unicode
+(defvar onncera-u-map (make-sparse-keymap) "onncera C-c u prefix")     ;; unicode
 (global-set-key (kbd "C-c u") onncera-u-map)
-(define-key onncera-u-map (kbd "b") #'onncera-insert-dagger)  ;; blue highlights
-(define-key onncera-u-map (kbd "p") #'onncera-insert-double-dagger)  ;; pink highlights
+(define-key onncera-u-map (kbd "b") #'onncera-insert-currency-sign)    ;; blue highlights
+(define-key onncera-u-map (kbd "p") #'onncera-insert-double-dagger)    ;; pink highlights
+(define-key onncera-u-map (kbd "y") #'onncera-insert-plus-minus-sign)  ;; yellow highlights
 
 (global-set-key (kbd "M-o") 'other-window)
 
