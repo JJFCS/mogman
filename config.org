@@ -255,9 +255,9 @@ $ ORG
 (setq org-fontify-quote-and-verse-blocks t)  ;; force org to use org-quote face to text inside quote blocks
 
 (font-lock-add-keywords 'org-mode '(
-    ("¤\\([^¤]+\\)¤" (1 '(:background "blue"      :foreground "white") prepend))
-    ("‡\\([^‡]+\\)‡" (1 '(:background "deep pink" :foreground "white") prepend))
-    ("±\\([^±]+\\)±" (1 '(:background "goldenrod" :foreground "white") prepend))
+    ("¤\\([^¤]+\\)¤" (1 '(:background "blue"          :foreground "white") prepend))
+    ("‡\\([^‡]+\\)‡" (1 '(:background "deep pink"     :foreground "white") prepend))
+    ("±\\([^±]+\\)±" (1 '(:background "DarkGoldenrod" :foreground "white") prepend))
         )
     )
 #+end_src
