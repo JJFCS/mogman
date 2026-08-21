@@ -233,15 +233,6 @@ $ GIT & VC & MAGIT & ETC
 #+end_src
 
 ! CONVENIENCE
-$ CONSOLIDATION
-#+begin_src emacs-lisp
-
-;; NOTE - give packages their own section if they require configuration
-(use-package avy           :ensure t :defer t)  ;; TODO - swap out for flash?
-(use-package expand-region :ensure t :defer t)
-
-#+end_src
-
 $ CONSULT
 #+begin_src emacs-lisp
 (use-package consult :ensure t
