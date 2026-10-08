@@ -317,7 +317,7 @@ $ assorted - TODO - change to a nicer name - move packages to their own blocks
     (setq   shell-pop-term-shell shell-file-name)
     (setq   shell-pop-window-size 50)
     (setopt shell-pop-shell-type '("ansi-term" "*ansi-term*" (lambda ()  ;; `setopt is important
-                                 (ansi-term shell-pop-term-shell))))
+                                   (ansi-term shell-pop-term-shell))))
     (setq   shell-pop-autocd-to-working-dir nil))
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
