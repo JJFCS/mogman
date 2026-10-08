@@ -490,8 +490,8 @@ $ unbind etc
                        ("M-0"   . avy-goto-char)        ;; input one  char  , jump to it with a tree
                        ("C-M-0" . avy-goto-line)        ;; input zero chars , jump to a line start with a tree
 
-                       ("C-1"   . end-of-defun)
-                       ("C-2"   . beginning-of-defun)
+                       ("C-1"   . beginning-of-defun)
+                       ("C-2"   . end-of-defun)
                        ("C-3"   . mark-defun)
 
                        ("C-4"   . backward-sexp)
