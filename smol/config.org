@@ -38,7 +38,7 @@ LEGEND
 #+begin_src emacs-lisp
 
 (add-to-list 'exec-path "/opt/homebrew/bin")
-(add-to-list 'default-frame-alist '(fullscreen . fullboth))
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
 
 ;; NOTE - for variables we use 't' or 'nil'
 ;; NOTE - for functions we use numbers (1 == enabled , 0 == disabled , no number means toggle)
