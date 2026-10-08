@@ -1,0 +1,547 @@
+
+mogman's minimal emacs - mme
+
+LEGEND
+
+"!" == HEADER
+"-" == NOTES
+"$" == SUBTOPIC
+
+#+begin_src emacs-lisp
+    ;; -*- lexical-binding: t; -*-
+#+end_src
+
+! CUSTOM FILE
+#+begin_src emacs-lisp
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(load custom-file t)
+#+end_src
+
+! PACKAGE MANAGEMENT
+#+begin_src emacs-lisp
+
+(require 'package)
+(setq package-archives '(
+    ("melpa" . "https://melpa.org/packages/") ("elpa" . "https://elpa.gnu.org/packages/")
+        )
+)
+
+;; we make use of melpa the most so we priortise that first
+(setq package-archive-priorities '(("melpa" . 10) ("elpa" . 5)))
+
+(unless (package-installed-p 'use-package) (package-refresh-contents) (package-install 'use-package))
+(require 'use-package)
+
+#+end_src
+
+! GENERAL SETTINGS
+#+begin_src emacs-lisp
+
+(add-to-list 'exec-path "/opt/homebrew/bin")
+(add-to-list 'default-frame-alist '(fullscreen . fullboth))
+
+;; NOTE - for variables we use 't' or 'nil'
+;; NOTE - for functions we use numbers (1 == enabled , 0 == disabled , no number means toggle)
+(setq inhibit-splash-screen t)
+(setq insert-directory-program "gls")
+(setq enable-recursive-minibuffers t)
+(setq lossage-size 1000)
+(setq locate-command "mdfind")
+(setq kill-do-not-save-duplicates t)
+(setq kill-region-dwim  'emacs-word)
+(setq global-auto-revert-non-file-buffers t)    ;; auto revert non-file buffers (e.g. dired)
+(setq view-lossage-auto-refresh t)              ;; a buffer that shows your real time key presses
+(setq display-line-numbers-type 'relative)
+(setq completions-detailed t)                   ;; annotations (marginalia replacement)
+(setq redisplay-skip-fontification-on-input t)  ;; skip fontification during input (from doom emacs)
+(setq set-mark-command-repeat-pop t)            ;; after C-u C-SPC , keep popping the mark ring with just C-SPC instead of having to repeat the C-u prefix each time
+(setq savehist-additional-variables '(search-ring regexp-search-ring kill-ring))
+
+(setq-default truncate-lines t)
+
+;; bidi (bidirectional text) reordering checks are expensive and
+;; do not need them for programming buffers
+(setq-default bidi-display-reordering 'left-to-right)
+(setq bidi-inhibit-bpa t)
+
+(put 'upcase-region 'disabled nil) (put 'downcase-region 'disabled nil)
+
+(blink-cursor-mode 0)
+(delete-selection-mode 1)
+(electric-pair-mode 1)
+(fringe-mode 0)
+
+(setq recentf-save-file "~/.emacs.d/onemacs-cache/recentf")  ;; NOTE - hardcoding the path
+(setq savehist-file     "~/.emacs.d/onemacs-cache/history")  ;; NOTE - hardcoding the path
+(recentf-mode 1) (savehist-mode 1)  ;; NOTE - to del M-x history go to onemacs-cache & delete the "history" file
+
+(global-auto-revert-mode)           ;; auto refresh file buffers when the file on disk changes outside of emacs
+(global-visual-wrap-prefix-mode)    ;; wrapped lines respect the indentation of the original file
+(global-display-line-numbers-mode)  ;; TODO - may want to use a hook to enable in certain modes only - helps with performance
+(global-hl-line-mode)
+
+;; @check TODO - done by AI
+;; creating the necessary directories
+(defconst my-cache-dir (expand-file-name "onemacs-cache/" user-emacs-directory))
+(dolist (dir '("backups" "autosave" "auto-save-list")) (make-directory (expand-file-name dir my-cache-dir) t))
+
+;; for backups/autosave/etc
+(setq backup-directory-alist `(("." . ,(expand-file-name "onemacs-cache/backups/" user-emacs-directory))))
+
+;; for when emacs crashes
+;; these are not backups , it is a crash recovery file
+;; these are created while you are editing
+(setq auto-save-file-name-transforms `((".*" ,(expand-file-name "onemacs-cache/autosave/" user-emacs-directory) t)))
+
+;; emacs maintains a list of active auto-save files
+;; exist so emacs can find recovery files
+(setq auto-save-list-file-prefix
+    (expand-file-name "onemacs-cache/auto-save-list/.saves-"
+            user-emacs-directory))
+
+#+end_src
+
+! FUNCTIONS & VARIABLES
+- these are functions & variables that need to be defined asap
+$ function 1 (done by AI) - check!
+#+begin_src emacs-lisp
+(defun onncera-highlight-todo ()
+    (font-lock-add-keywords nil `((,(concat "\\<" (regexp-opt '("TODO" "FIXME" "BUG" "NOTE")) "\\>")
+        0
+        '(:foreground "red" :weight bold)
+        t
+            )
+        )
+    )
+)
+#+end_src
+
+$ function 2 (done by AI) - check!
+#+begin_src emacs-lisp
+(defun onncera-smart-beginning-of-line ()
+    "moves cursor to first non-whitespace char or beg of line - alternates"
+    (interactive)
+    (let ((old-point (point)))
+        (back-to-indentation)
+        (when (= old-point (point))
+            (beginning-of-line)
+        )
+    )
+)
+#+end_src
+
+$ function 3
+#+begin_src emacs-lisp
+(defun onncera-create-ansi-term () "Launch 'ansi-term' instantly using bash as the default shell"
+    (interactive)
+    (ansi-term "/bin/bash"))
+#+end_src
+
+$ function 4
+#+begin_src emacs-lisp
+(defun onncera-insert-double-dagger () (interactive) (insert "‡"))
+(defun onncera-insert-plus-minus-sign () (interactive) (insert "±"))
+(defun onncera-insert-currency-sign () (interactive) (insert "¤"))
+#+end_src
+
+$ function 5
+#+begin_src emacs-lisp
+
+(defun onncera/mark-word-forward  () "extend the region forward  by one word"
+    (interactive) (unless (region-active-p) (set-mark (point))) (forward-word  1) (activate-mark))
+
+(defun onncera/mark-word-backward () "extend the region backward by one word"
+    (interactive) (unless (region-active-p) (set-mark (point))) (backward-word 1) (activate-mark))
+
+#+end_src
+
+$ function 6
+#+begin_src emacs-lisp
+
+(defun onncera/disable-italics ()
+    (interactive)
+    (dolist (face (face-list))
+      (when (memq (face-attribute face :slant nil t)
+            '(italic oblique))
+            (set-face-attribute face nil :slant 'normal)
+      )
+    )
+)
+
+#+end_src
+
+! THEMES & FONTS & APPEARANCES
+#+begin_src emacs-lisp
+
+;; (use-package pixel-themes :vc (:url "https://github.com/lucasobx/pixel-themes"))
+;; (mapc #'disable-theme custom-enabled-themes)
+;; (load-theme 'pixel-themes-alia16 t)
+;; (onncera/disable-italics)
+
+(add-to-list 'warning-suppress-types '(files missing-lexbind-cookie))  ;; specifically for pinerose theme - remove in future
+(use-package autothemer :ensure t)  ;; dependency
+(use-package pinerose-emacs :vc (:url "https://github.com/konrad1977/pinerose-emacs")
+    :no-require t)
+
+(mapc #'disable-theme custom-enabled-themes)
+(load-theme 'rose-pine t)
+(onncera/disable-italics)
+
+(set-face-attribute 'completions-group-title nil :slant 'normal)
+
+(set-face-attribute 'default        nil :family "JetBrainsMonoNL Nerd Font" :height 140 :width 'condensed :weight 'regular)  ;; MartianMono Nerd Font Mono
+(set-face-attribute 'fixed-pitch    nil :family "JetBrainsMonoNL Nerd Font" :height 140 :width 'condensed :weight 'regular)  ;; MartianMono Nerd Font Mono
+(set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
+
+#+end_src
+
+! COMPLETIONS & MINIBUFFER
+$ emacs 31 minibuffer
+#+begin_src emacs-lisp
+
+(use-package minibuffer
+    :config (setq completions-sort 'alphabetical)  ;; alternative - 'historical'
+    (setq completion-ignore-case t)
+    (setq completion-show-help nil)
+    (setq completion-show-inline-help t) (setq completion-eager-update t)
+)
+
+#+end_src
+
+! PROGRAMMING
+$ TABS & INDENTS & SPACES & WHITESPACES & ETC
+#+begin_src emacs-lisp
+(setq whitespace-style
+    '(face indentation newline tabs tab-mark trailing
+        spaces
+        space-before-tab
+        space-after-tab
+        space-mark
+    )
+)
+
+(electric-indent-mode 1)
+
+(setq python-indent-guess-indent-offset nil)
+
+(add-hook 'prog-mode-hook (lambda ()
+        (setq-local indent-tabs-mode t)
+        (setq-local tab-width 4)
+    )
+)
+
+(setq-default tab-always-indent 'complete) (setq-default indent-tabs-mode t)
+(setq-default tab-width 4)
+(setq-default standard-indent 4)
+#+end_src
+
+$ GIT & VC & MAGIT & ETC
+#+begin_src emacs-lisp
+(use-package git-gutter :ensure t :hook (prog-mode . git-gutter-mode))
+(use-package magit      :ensure t :defer t)
+#+end_src
+
+! CONVENIENCE
+$ assorted - TODO - change to a nicer name - move packages to their own blocks
+#+begin_src emacs-lisp
+
+;; @subtopic FIDO
+;; TODO - do not cut the word short when there is a match & when there is a 'Matched' , highlight the word in red - last i checked this is a long ass solution
+(fido-mode 1)
+(define-key icomplete-minibuffer-map (kbd "<right>") #'icomplete-forward-completions) (define-key icomplete-minibuffer-map (kbd "<left>")  #'icomplete-backward-completions)
+(define-advice icomplete-completions (:filter-return (str) onncera-icomplete-padding)
+    "prepend breathing room before horizontal completion candidates"
+    (when (and (stringp str) (not (string-prefix-p " " str)))
+        (concat "     " str)))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic orderless
+(use-package orderless  :ensure t
+    :config
+    (setq completion-styles '(orderless basic)
+            )
+)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic avy
+(use-package avy :ensure t :defer t)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic move-text
+;; TODO - may be can defer
+(use-package move-text
+    :ensure t
+    :config
+    ;; Function advice to have Emacs re-indent the text in-and-around a text move
+    (defun onncera-move-text-indent-region-advice (&rest _ignored)
+        (let ((deactivate deactivate-mark))
+            (if (region-active-p)
+                (indent-region (region-beginning) (region-end))
+                (indent-region (line-beginning-position) (line-end-position)))
+            (setq deactivate-mark deactivate)))
+    (advice-add 'move-text-up   :after #'onncera-move-text-indent-region-advice)
+    (advice-add 'move-text-down :after #'onncera-move-text-indent-region-advice)
+)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic company
+(use-package company
+    :ensure t
+    :hook (prog-mode . company-mode)
+    :config
+    (setq company-dabbrev-code-other-buffers t)
+    (setq company-dabbrev-ignore-case nil)
+    (setq company-selection-wrap-around t)
+    (setq company-backends
+        '(company-files
+         (company-capf :with company-dabbrev-code)
+          company-dabbrev
+          company-keywords)
+    )
+)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic whitespace handling
+(add-hook 'before-save-hook #'delete-trailing-whitespace)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic shell-pop
+(use-package shell-pop :ensure t
+    :bind ("M-`" . shell-pop)
+    :config
+    (with-eval-after-load 'term
+    (define-key term-raw-map (kbd "M-`") #'shell-pop))  ;; needed for my personal keybind
+    (setq   shell-pop-universal-key "M-`")              ;; the keybind to toggle the shell window
+    (setq   shell-pop-window-position "bottom")
+    (setq   shell-pop-full-span nil)
+    (setq   shell-pop-term-shell shell-file-name)
+    (setq   shell-pop-window-size 30)
+    (setopt shell-pop-shell-type '("ansi-term" "*ansi-term*" (lambda ()  ;; `setopt is important
+                                 (ansi-term shell-pop-term-shell))))
+    (setq   shell-pop-autocd-to-working-dir nil))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#+end_src
+
+$ ORG
+#+begin_src emacs-lisp
+(setq org-startup-with-inline-images t)
+(setq org-fontify-quote-and-verse-blocks t)  ;; force org to use org-quote face to text inside quote blocks
+
+(font-lock-add-keywords 'org-mode '(
+    ("¤\\([^¤]+\\)¤" (1 '(:background "blue"          :foreground "white") prepend))
+    ("‡\\([^‡]+\\)‡" (1 '(:background "deep pink"     :foreground "white") prepend))
+    ("±\\([^±]+\\)±" (1 '(:background "DarkGoldenrod" :foreground "white") prepend))
+        )
+    )
+#+end_src
+
+$ IMENU
+#+begin_src emacs-lisp
+(use-package imenu
+    :config (setq imenu-auto-rescan t) (setq imenu-level-separator "/") (setq imenu-max-item-no-type 0))
+#+end_src
+
+$ MULTIPLE CURSORS
+#+begin_src emacs-lisp
+(use-package multiple-cursors :ensure t :defer t
+    :init (setq mc/list-file "~/.emacs.d/onemacs-cache/mc-lists.el"))
+#+end_src
+
+$ UNDO & REDO
+#+begin_src emacs-lisp
+(use-package vundo   :ensure t :defer t)
+(use-package undo-fu :ensure t
+    :bind (
+    ("C-/" . undo-fu-only-undo)
+    ("C-?" . undo-fu-only-redo)
+    )
+)
+
+
+(use-package undo-fu-session
+    :ensure t
+    :init
+    (setq undo-fu-session-directory
+        (expand-file-name "onemacs-cache/undo-fu-session/" user-emacs-directory))
+    (setq undo-fu-session-incompatible-files '
+        ("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
+
+    :config
+    (undo-fu-session-global-mode)
+    )
+#+end_src
+
+! HOOKS
+#+begin_src emacs-lisp
+(add-hook 'prog-mode-hook 'onncera-highlight-todo)
+(add-hook 'prog-mode-hook 'whitespace-mode)
+#+end_src
+
+! KEYBINDINGS
+- super cool & important commands
+> view-lossage            (C-h l)
+> view-echo-area-messages (C-h e)
+$ packages related to keybinds
+#+begin_src emacs-lisp
+(use-package which-key
+    :config
+    (setq which-key-show-early-on-C-h t)
+    (setq which-key-idle-delay 1e6)
+    (setq which-key-idle-secondary-delay 0.05)
+    (which-key-mode))
+#+end_src
+
+$ onncera-a-map (done by AI) - check!
+#+begin_src emacs-lisp
+
+(defvar onncera-a-map (make-sparse-keymap) "onncera C-c a prefix")
+(global-set-key (kbd "C-c a") onncera-a-map)
+(define-key onncera-a-map (kbd "i") #'imenu)
+(define-key onncera-a-map (kbd "t") #'onncera-create-ansi-term)
+
+(defvar onncera-u-map (make-sparse-keymap) "onncera C-c u prefix")     ;; unicode
+(global-set-key (kbd "C-c u") onncera-u-map)
+(define-key onncera-u-map (kbd "b") #'onncera-insert-currency-sign)    ;; blue highlights
+(define-key onncera-u-map (kbd "p") #'onncera-insert-double-dagger)    ;; pink highlights
+(define-key onncera-u-map (kbd "y") #'onncera-insert-plus-minus-sign)  ;; yellow highlights
+
+(global-set-key (kbd "M-o") 'other-window)
+
+#+end_src
+
+$ remaps
+#+begin_src emacs-lisp
+(global-set-key [remap move-beginning-of-line] 'onncera-smart-beginning-of-line)
+#+end_src
+
+! reclaiming keys
+$ unbind default digit shortcuts [C-0..9, M-0..9, C-M-0..9]
+#+begin_src emacs-lisp
+(dotimes (i 10)
+    (dolist (prefix '("C-" "M-" "C-M-"))
+        (global-unset-key (kbd (format "%s%d" prefix i)))))
+#+end_src
+
+$ unbind more keys
+#+begin_src emacs-lisp
+
+(global-unset-key (kbd "<end>"   ))      ;; this is the 'end'       key on my logitech keyboard
+(global-unset-key (kbd "<prior>" ))      ;; this is the 'page up'   key on my logitech keyboard
+(global-unset-key (kbd "<help>"  ))      ;; this is the 'insert'    key on my logitech keyboard
+(global-unset-key (kbd "<home>"  ))      ;; this is the 'home'      key on my logitech keyboard
+(global-unset-key (kbd "<next>"  ))      ;; this is the 'page down' key on my logitech keyboard
+(global-unset-key (kbd "<deletechar>"))  ;; this is the 'delete'    key on my logitech keyboard
+
+(dolist (key '("<end>" "<prior>" "<help>" "<home>" "<next>" "<delete>" "<deletechar>"))
+    (dolist (prefix '("" "C-" "M-" "C-M-"))
+        (global-unset-key (kbd (format "%s%s" prefix key)))))
+
+#+end_src
+
+$ unbind F9-F15 [base, C-, M-, S-, C-M-]
+#+begin_src emacs-lisp
+(dotimes (i 7)
+    (let ((f-key (format "<f%d>" (+ i 9))))
+        (dolist (prefix '("" "C-" "M-" "S-" "C-M-"))
+            (global-unset-key (kbd (format "%s%s" prefix f-key))))))
+#+end_src
+
+$ unbind etc
+#+begin_src emacs-lisp
+
+(global-unset-key (kbd "M-<left>"  ))
+(global-unset-key (kbd "M-<right>" ))
+
+#+end_src
+
+! NAVIGATION
+#+begin_src emacs-lisp
+
+;; TODO - place this in bashrc (alias emacs="/Applications/Emacs.app/Contents/MacOS/Emacs") - beware renamed applicaton
+;; so that when we want to have a look at what vanilla
+;; emacs original keybindings are , you can just run "emacs -Q" in the terminal
+
+#+end_src
+
+#+begin_src emacs-lisp
+(pcase-dolist (`(,key . ,cmd)
+                  '(
+                       ("<prior>"      . move-text-up)              ;; 'page up'
+                       ("<next>"       . move-text-down)            ;; 'page down'
+                       ("<home>"       . er/expand-region)          ;; 'home'
+                       ("<end>"        . er/contract-region)        ;; 'end'
+                       ("<help>"       . git-gutter:previous-hunk)  ;; 'insert'
+                       ("<deletechar>" . git-gutter:next-hunk)      ;; 'delete'
+
+                       ;; Future Modified Keys (just uncomment and fill in as you go!)
+                       ;; ("C-<home>"  . onncera-custom-command-one)  ;; CTRL + 'home'
+                       ;; ("M-<next>"  . onncera-custom-command-two)  ;; ALT  + 'page down'
+
+                       ))
+    (global-set-key (kbd key) cmd))
+#+end_src
+
+#+begin_src emacs-lisp
+(setq avy-timeout-seconds 1.0)
+(pcase-dolist (`(,key . ,cmd)
+                  '(
+                       ("C-0"   . avy-goto-char-timer)  ;; input an arbitrary amount of consecutive chars
+                       ("M-0"   . avy-goto-char)        ;; input one  char  , jump to it with a tree
+                       ("C-M-0" . avy-goto-line)        ;; input zero chars , jump to a line start with a tree
+
+                       ("C-1"   . end-of-defun)
+                       ("C-2"   . beginning-of-defun)
+                       ("C-3"   . mark-defun)
+
+                       ("C-4"   . backward-sexp)
+                       ("C-5"   . forward-sexp)
+                       ("C-6"   . mark-sexp)
+
+                       ("C-7"   . xref-go-back)
+                       ("C-8"   . xref-find-definitions)
+                       ("C-9"   . xref-find-references)
+
+                       ))
+    (global-set-key (kbd key) cmd))
+#+end_src
+
+#+begin_src emacs-lisp
+(pcase-dolist (`(,key . ,cmd)
+                  '(
+                       ;; Javelin
+                       ("<f9>"   . javelin-go-or-assign-to-1)
+                       ("<f10>"  . javelin-go-or-assign-to-2)
+                       ("<f11>"  . javelin-go-or-assign-to-3)
+                       ("<f12>"  . javelin-go-or-assign-to-4)
+                       ("<f13>"  . javelin-delete)                 ;; delete a specific position for the current project/branch
+                       ("<f14>"  . javelin-clear)                  ;; delete all positions for current project/branch
+                       ("<f15>"  . javelin-toggle-quick-menu)
+
+                       ;; Multiple Cursors
+                       ("C-<f9>"  . mc/mark-previous-like-this)    ;; NOTE - need to select a region
+                       ("C-<f10>" . mc/mark-next-like-this)        ;; NOTE - need to select a region
+                       ("C-<f11>" . mc/skip-to-previous-like-this)
+                       ("C-<f12>" . mc/skip-to-next-like-this)
+                       ("C-<f13>" . mc/mark-all-symbols-like-this-in-defun)
+                       ("C-<f14>" . mc/vertical-align-with-space)  ;; NOTE - select a region & add MCs with 'edit-lines' , then move to the end of the line and run this command
+                       ("C-<f15>" . mc/edit-lines)
+
+                       ;; Magit
+                       ("M-<f9>"  . magit-log-buffer-file)
+
+                       ))
+    (global-set-key (kbd key) cmd))
+#+end_src
+
+#+begin_src emacs-lisp
+
+(keymap-global-set "M-<left>"  #'onncera/mark-word-backward)
+(keymap-global-set "M-<right>" #'onncera/mark-word-forward)
+
+#+end_src
+
+- this line has to be ran the last
+#+begin_src emacs-lisp
+(set-face-attribute 'italic nil :slant 'normal)
+#+end_src
