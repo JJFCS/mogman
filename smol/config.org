@@ -203,7 +203,7 @@ $ emacs 31 minibuffer
     :config (setq completions-sort 'alphabetical)  ;; alternative - 'historical'
     (setq completion-ignore-case t)
     (setq completion-show-help nil)
-    (setq completion-show-inline-help t) (setq completion-eager-update t)
+    (setq completion-show-inline-help t) (setq completion-eager-update t) (setq completions-max-height 30)
 )
 
 #+end_src
