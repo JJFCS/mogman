@@ -291,20 +291,29 @@ $ assorted - TODO - change to a nicer name - move packages to their own blocks
 )
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; @subtopic company
-(use-package company
-    :ensure t
-    :hook (prog-mode . company-mode)
+;; @subtopic corfu
+(use-package corfu :ensure t :hook (prog-mode . corfu-mode)
     :config
-    (setq company-dabbrev-code-other-buffers t)
-    (setq company-dabbrev-ignore-case nil)
-    (setq company-selection-wrap-around t)
-    (setq company-backends
-        '(company-files
-         (company-capf :with company-dabbrev-code)
-          company-dabbrev
-          company-keywords)
+    (keymap-unset corfu-map "TAB") (keymap-unset corfu-map "<tab>")
+    (setq corfu-quit-no-match t) (setq corfu-quit-at-boundary t)
+    (setq corfu-auto t) (setq corfu-cycle t)
+)
+
+;; @subtopic cape
+(use-package cape :ensure t :demand t
+    :config
+    (defun onncera/cape-prog-setup ()
+        (add-hook 'completion-at-point-functions #'cape-file 80 t)
+        (add-hook 'completion-at-point-functions  (cape-capf-sort
+                  (cape-capf-super
+                 #'cape-dabbrev
+                 #'cape-keyword
+                  )
+              )
+          90 t
+        )
     )
+    (add-hook 'prog-mode-hook #'onncera/cape-prog-setup)
 )
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
