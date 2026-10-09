@@ -153,6 +153,13 @@ $ function 5
 (defun onncera/mark-word-backward () "extend the region backward by one word"
     (interactive) (unless (region-active-p) (set-mark (point))) (backward-word 1) (activate-mark))
 
+;; @subtopic text selection
+(defun onncera/mark-line-up ()   "extend the region upward   by one line"
+    (interactive) (unless (region-active-p) (set-mark (point))) (forward-line -1) (activate-mark))
+
+(defun onncera/mark-line-down () "extend the region downward by one line"
+    (interactive) (unless (region-active-p) (set-mark (point))) (forward-line  1) (activate-mark))
+
 #+end_src
 
 $ function 6
@@ -203,7 +210,7 @@ $ emacs 31 minibuffer
     :config (setq completions-sort 'alphabetical)  ;; alternative - 'historical'
     (setq completion-ignore-case t)
     (setq completion-show-help nil)
-    (setq completion-show-inline-help t) (setq completion-eager-update t) (setq completions-max-height 30)
+    (setq completion-show-inline-help t) (setq completion-eager-update t) (setq completions-max-height 15)
 )
 
 #+end_src
@@ -322,8 +329,7 @@ $ assorted - TODO - change to a nicer name - move packages to their own blocks
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic indent-bars
-(use-package indent-bars
-    :hook (prog-mode . indent-bars-mode)
+(use-package indent-bars :ensure t :hook (prog-mode . indent-bars-mode)
     :config
     (setq indent-bars-color '(highlight :face-bg t :blend 0.15))
     (setq indent-bars-pattern ".")
@@ -548,8 +554,9 @@ $ unbind etc
 
 #+begin_src emacs-lisp
 
-(keymap-global-set "M-<left>"  #'onncera/mark-word-backward)
-(keymap-global-set "M-<right>" #'onncera/mark-word-forward)
+(keymap-global-set "M-<up>" #'onncera/mark-line-up) (keymap-global-set "M-<down>" #'onncera/mark-line-down)
+(keymap-global-set "M-<right>" #'onncera/mark-word-forward) (keymap-global-set "M-<left>" #'onncera/mark-word-backward)
+(keymap-global-set key-translation-map "C-<tab>" "C-q TAB")
 
 #+end_src
 
