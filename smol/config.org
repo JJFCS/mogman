@@ -321,6 +321,18 @@ $ assorted - TODO - change to a nicer name - move packages to their own blocks
     (setq   shell-pop-autocd-to-working-dir nil))
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; @subtopic indent-bars
+(use-package indent-bars
+    :hook (prog-mode . indent-bars-mode)
+    :config
+    (setq indent-bars-color '(highlight :face-bg t :blend 0.15))
+    (setq indent-bars-pattern ".")
+    (setq indent-bars-color-by-depth '(:regexp "outline-\\([0-9]+\\)" :blend 1))
+    (setq indent-bars-highlight-current-depth '(:blend 0.5))
+    (setq indent-bars-display-on-blank-lines t)
+)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 #+end_src
 
 $ ORG
@@ -450,8 +462,8 @@ $ unbind F9-F15 [base, C-, M-, S-, C-M-]
 $ unbind etc
 #+begin_src emacs-lisp
 
-(global-unset-key (kbd "M-<left>"  ))
-(global-unset-key (kbd "M-<right>" ))
+(global-unset-key (kbd "M-<left>" ))
+(global-unset-key (kbd "M-<right>"))
 
 #+end_src
 
