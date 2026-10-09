@@ -292,9 +292,10 @@ $ assorted - TODO - change to a nicer name - move packages to their own blocks
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic corfu
+(set-face-attribute 'corfu-current nil :background "#524F67" :foreground "#E0DEF4" :weight 'bold)  ;; move below if error
 (use-package corfu :ensure t :hook (prog-mode . corfu-mode)
     :config
-    (keymap-unset corfu-map "TAB") (keymap-unset corfu-map "<tab>")
+    (keymap-unset corfu-map "<tab>") (keymap-unset corfu-map "TAB")
     (setq corfu-quit-no-match t) (setq corfu-quit-at-boundary t)
     (setq corfu-auto t) (setq corfu-cycle t)
 )
