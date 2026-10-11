@@ -180,25 +180,32 @@ $ function 6
 $ function 7
 #+begin_src emacs-lisp
 
-(defun onncera-smart-tabs () "convert leading groups of 4 spaces into tabs"
+(defun onncera-smart-tabs () "convert leading groups of 4 spaces to tabs & subsequent tabs to spaces"
     (interactive)
-    (save-excursion
-    (save-restriction
-        (widen)
-        (goto-char (point-min))
-        (while (re-search-forward "^[ \t]+" nil t)
-            (unless (or (eolp)
-                        (nth 3
-                        (save-excursion
-                        (save-match-data
-                        (syntax-ppss (match-beginning 0))
-                            ))))
-                        (replace-match
-                        (replace-regexp-in-string " \\{4\\}" "\t"
-                        (match-string-no-properties 0) t t)
-                                                       t t)
-                            ))))
-)
+    (let ((tab-width 4))
+        (save-excursion
+        (save-restriction
+            (widen)
+            (goto-char (point-min))
+            (while (< (point) (point-max))
+                (let* ((beg (point))
+                       (end (progn
+                            (skip-chars-forward " \t" (line-end-position))
+                            (point)))
+                       (prefix (buffer-substring-no-properties beg end))
+                       (state  (save-excursion
+                               (save-match-data
+                                   (syntax-ppss beg)))))
+                    (unless (or (eolp) (nth 3 state))
+                       (let ((replacement
+                             (replace-regexp-in-string
+                            " \\{4\\}" "\t" prefix t t)))
+                       (unless (equal prefix replacement)
+                           (delete-region beg end)
+                           (insert replacement)))
+                       ;; everything after the leading indentation uses spaces
+                       (untabify (point) (line-end-position))))
+                (forward-line 1))))))
 
 #+end_src
 
