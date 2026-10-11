@@ -217,6 +217,72 @@ $ function 7
 ;; (load-theme 'pixel-themes-alia16 t)
 ;; (onncera-disable-italics)
 
+
+
+;; ;; start of onncera's custom dark minimal theme - uncomment this entire block (including this comment)
+;; (mapc #'disable-theme custom-enabled-themes)
+;; (deftheme dark-minimal)
+
+;; (let
+;;     (
+;;     (bg    "#0B0B0B")
+;;     (fg    "#FFFFFF")
+;;     (green "#008000")
+;;     )
+
+;;     (custom-theme-set-faces
+;;     'dark-minimal
+;;    `(default            ((t (:foreground ,fg         :background ,bg))))
+;;    `(hl-line            ((t (:foreground unspecified :background "#1A1A1A" :extend t))))
+;;    `(cursor             ((t (:background ,fg))))
+;;    `(region             ((t (:foreground ,bg         :background ,fg))))
+;;    `(mode-line          ((t (:foreground ,bg         :background ,fg))))
+;;    `(mode-line-inactive ((t (:foreground ,fg         :background ,bg))))
+;;    `(minibuffer-prompt  ((t (:foreground ,green)))))
+
+;;     (dolist (face '(
+;;         font-lock-builtin-face
+;;         font-lock-keyword-face
+;;         font-lock-function-name-face
+;;         font-lock-variable-name-face
+;;         font-lock-type-face
+;;         font-lock-constant-face
+;;         font-lock-string-face
+;;         font-lock-warning-face))
+;;             (custom-theme-set-faces
+;;             'dark-minimal `(,face ((t (:foreground ,fg :weight normal :slant normal))))))
+
+;;     (dolist (face '(
+;;         font-lock-comment-face
+;;         font-lock-comment-delimiter-face
+;;         font-lock-doc-face
+;;         ))
+;;         (custom-theme-set-faces
+;;                'dark-minimal
+;;                `(,face ((t (:foreground ,green :slant normal))))))
+
+;;     (dolist (face '(
+;;         whitespace-space
+;;         whitespace-tab
+;;         whitespace-newline
+;;         whitespace-trailing
+;;         whitespace-empty
+;;         whitespace-line
+;;         whitespace-indentation
+;;         whitespace-space-before-tab
+;;         whitespace-space-after-tab
+;;         ))
+;;         (custom-theme-set-faces
+;;                'dark-minimal
+;;                `(,face ((t (:foreground "#3C3C3C" :background ,bg
+;;                             :weight normal :slant normal
+;;                             :underline nil :inverse-video nil)))))))
+
+;; ;; (enable-theme 'dark-minimal)
+;; end   of onncera's custom dark minimal theme - uncomment this entire block (including this comment)
+
+
+
 (add-to-list 'warning-suppress-types '(files missing-lexbind-cookie))  ;; specifically for pinerose theme - remove in future
 (use-package autothemer :ensure t)  ;; dependency
 (use-package pinerose-emacs :vc (:url "https://github.com/konrad1977/pinerose-emacs")
