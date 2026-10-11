@@ -147,17 +147,17 @@ $ function 4
 $ function 5
 #+begin_src emacs-lisp
 
-(defun onncera/mark-word-forward  () "extend the region forward  by one word"
+(defun onncera-mark-word-forward  () "extend the region forward  by one word"
     (interactive) (unless (region-active-p) (set-mark (point))) (forward-word  1) (activate-mark))
 
-(defun onncera/mark-word-backward () "extend the region backward by one word"
+(defun onncera-mark-word-backward () "extend the region backward by one word"
     (interactive) (unless (region-active-p) (set-mark (point))) (backward-word 1) (activate-mark))
 
 ;; @subtopic text selection
-(defun onncera/mark-line-up ()   "extend the region upward   by one line"
+(defun onncera-mark-line-up ()   "extend the region upward   by one line"
     (interactive) (unless (region-active-p) (set-mark (point))) (forward-line -1) (activate-mark))
 
-(defun onncera/mark-line-down () "extend the region downward by one line"
+(defun onncera-mark-line-down () "extend the region downward by one line"
     (interactive) (unless (region-active-p) (set-mark (point))) (forward-line  1) (activate-mark))
 
 #+end_src
@@ -165,7 +165,7 @@ $ function 5
 $ function 6
 #+begin_src emacs-lisp
 
-(defun onncera/disable-italics ()
+(defun onncera-disable-italics ()
     (interactive)
     (dolist (face (face-list))
       (when (memq (face-attribute face :slant nil t)
@@ -180,7 +180,7 @@ $ function 6
 $ function 7
 #+begin_src emacs-lisp
 
-(defun onncera/smart-tabs () "convert leading groups of 4 spaces into tabs"
+(defun onncera-smart-tabs () "convert leading groups of 4 spaces into tabs"
     (interactive)
     (save-excursion
     (save-restriction
@@ -188,13 +188,17 @@ $ function 7
         (goto-char (point-min))
         (while (re-search-forward "^[ \t]+" nil t)
             (unless (or (eolp)
-                        (nth 3 (syntax-ppss (match-beginning 0))))
-                    (replace-match
-                    (replace-regexp-in-string " \\{4\\}" "\t"
+                        (nth 3
+                        (save-excursion
+                        (save-match-data
+                        (syntax-ppss (match-beginning 0))
+                            ))))
+                        (replace-match
+                        (replace-regexp-in-string " \\{4\\}" "\t"
                         (match-string-no-properties 0) t t)
-                    t t)
-                    ))))
-                    )
+                                                       t t)
+                            ))))
+)
 
 #+end_src
 
@@ -204,7 +208,7 @@ $ function 7
 ;; (use-package pixel-themes :vc (:url "https://github.com/lucasobx/pixel-themes"))
 ;; (mapc #'disable-theme custom-enabled-themes)
 ;; (load-theme 'pixel-themes-alia16 t)
-;; (onncera/disable-italics)
+;; (onncera-disable-italics)
 
 (add-to-list 'warning-suppress-types '(files missing-lexbind-cookie))  ;; specifically for pinerose theme - remove in future
 (use-package autothemer :ensure t)  ;; dependency
@@ -213,7 +217,7 @@ $ function 7
 
 (mapc #'disable-theme custom-enabled-themes)
 (load-theme 'rose-pine t)
-(onncera/disable-italics)
+(onncera-disable-italics)
 
 (set-face-attribute 'completions-group-title nil :slant 'normal)
 
@@ -255,7 +259,7 @@ $ TABS & INDENTS & SPACES & WHITESPACES & ETC
 (add-hook 'prog-mode-hook (lambda ()
         (setq-local indent-tabs-mode t)
         (setq-local tab-width 4)
-        (add-hook  'before-save-hook #'onncera/smart-tabs nil t)
+        (add-hook  'before-save-hook #'onncera-smart-tabs nil t)
     )
 )
 
@@ -587,8 +591,8 @@ $ unbind etc
 
 #+begin_src emacs-lisp
 
-(keymap-global-set "M-<up>" #'onncera/mark-line-up) (keymap-global-set "M-<down>" #'onncera/mark-line-down)
-(keymap-global-set "M-<right>" #'onncera/mark-word-forward) (keymap-global-set "M-<left>" #'onncera/mark-word-backward)
+(keymap-global-set "M-<up>" #'onncera-mark-line-up) (keymap-global-set "M-<down>" #'onncera-mark-line-down)
+(keymap-global-set "M-<right>" #'onncera-mark-word-forward) (keymap-global-set "M-<left>" #'onncera-mark-word-backward)
 (keymap-global-set "C-<tab>" (lambda () (interactive) (insert "\t")
     )
     )
