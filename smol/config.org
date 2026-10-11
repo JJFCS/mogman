@@ -177,6 +177,27 @@ $ function 6
 
 #+end_src
 
+$ function 7
+#+begin_src emacs-lisp
+
+(defun onncera/smart-tabs () "convert leading groups of 4 spaces into tabs"
+    (interactive)
+    (save-excursion
+    (save-restriction
+        (widen)
+        (goto-char (point-min))
+        (while (re-search-forward "^[ \t]+" nil t)
+            (unless (or (eolp)
+                        (nth 3 (syntax-ppss (match-beginning 0))))
+                    (replace-match
+                    (replace-regexp-in-string " \\{4\\}" "\t"
+                        (match-string-no-properties 0) t t)
+                    t t)
+                    ))))
+                    )
+
+#+end_src
+
 ! THEMES & FONTS & APPEARANCES
 #+begin_src emacs-lisp
 
@@ -234,12 +255,14 @@ $ TABS & INDENTS & SPACES & WHITESPACES & ETC
 (add-hook 'prog-mode-hook (lambda ()
         (setq-local indent-tabs-mode t)
         (setq-local tab-width 4)
+        (add-hook  'before-save-hook #'onncera/smart-tabs nil t)
     )
 )
 
 (setq-default tab-always-indent 'complete) (setq-default indent-tabs-mode t)
 (setq-default tab-width 4)
 (setq-default standard-indent 4)
+
 #+end_src
 
 $ GIT & VC & MAGIT & ETC
@@ -566,7 +589,7 @@ $ unbind etc
 
 (keymap-global-set "M-<up>" #'onncera/mark-line-up) (keymap-global-set "M-<down>" #'onncera/mark-line-down)
 (keymap-global-set "M-<right>" #'onncera/mark-word-forward) (keymap-global-set "M-<left>" #'onncera/mark-word-backward)
-(keymap-global-set key-translation-map "C-<tab>" "C-q TAB")
+(keymap-global-set key-translation-map "C-<tab>" "\t")
 
 #+end_src
 
