@@ -105,19 +105,6 @@ LEGEND
 - these are functions & variables that need to be defined asap
 $ function 1 (done by AI) - check!
 #+begin_src emacs-lisp
-(defun onncera-highlight-todo ()
-    (font-lock-add-keywords nil `((,(concat "\\<" (regexp-opt '("TODO" "FIXME" "BUG" "NOTE")) "\\>")
-        0
-        '(:foreground "red" :weight bold)
-        t
-            )
-        )
-    )
-)
-#+end_src
-
-$ function 2 (done by AI) - check!
-#+begin_src emacs-lisp
 (defun onncera-smart-beginning-of-line ()
     "moves cursor to first non-whitespace char or beg of line - alternates"
     (interactive)
@@ -130,21 +117,21 @@ $ function 2 (done by AI) - check!
 )
 #+end_src
 
-$ function 3
+$ function 2
 #+begin_src emacs-lisp
 (defun onncera-create-ansi-term () "Launch 'ansi-term' instantly using bash as the default shell"
     (interactive)
     (ansi-term "/bin/bash"))
 #+end_src
 
-$ function 4
+$ function 3
 #+begin_src emacs-lisp
 (defun onncera-insert-double-dagger () (interactive) (insert "‡"))
 (defun onncera-insert-plus-minus-sign () (interactive) (insert "±"))
 (defun onncera-insert-currency-sign () (interactive) (insert "¤"))
 #+end_src
 
-$ function 5
+$ function 4
 #+begin_src emacs-lisp
 
 (defun onncera-mark-word-forward  () "extend the region forward  by one word"
@@ -162,7 +149,7 @@ $ function 5
 
 #+end_src
 
-$ function 6
+$ function 5
 #+begin_src emacs-lisp
 
 (defun onncera-disable-italics ()
@@ -177,7 +164,7 @@ $ function 6
 
 #+end_src
 
-$ function 7
+$ function 6
 #+begin_src emacs-lisp
 
 (defun onncera-smart-tabs () "convert leading groups of 4 spaces to tabs & subsequent tabs to spaces"
@@ -216,71 +203,6 @@ $ function 7
 ;; (mapc #'disable-theme custom-enabled-themes)
 ;; (load-theme 'pixel-themes-alia16 t)
 ;; (onncera-disable-italics)
-
-
-
-;; ;; start of onncera's custom dark minimal theme - uncomment this entire block (including this comment)
-;; (mapc #'disable-theme custom-enabled-themes)
-;; (deftheme dark-minimal)
-
-;; (let
-;;     (
-;;     (bg    "#0B0B0B")
-;;     (fg    "#FFFFFF")
-;;     (green "#008000")
-;;     )
-
-;;     (custom-theme-set-faces
-;;     'dark-minimal
-;;    `(default            ((t (:foreground ,fg         :background ,bg))))
-;;    `(hl-line            ((t (:foreground unspecified :background "#1A1A1A" :extend t))))
-;;    `(cursor             ((t (:background ,fg))))
-;;    `(region             ((t (:foreground ,bg         :background ,fg))))
-;;    `(mode-line          ((t (:foreground ,bg         :background ,fg))))
-;;    `(mode-line-inactive ((t (:foreground ,fg         :background ,bg))))
-;;    `(minibuffer-prompt  ((t (:foreground ,green)))))
-
-;;     (dolist (face '(
-;;         font-lock-builtin-face
-;;         font-lock-keyword-face
-;;         font-lock-function-name-face
-;;         font-lock-variable-name-face
-;;         font-lock-type-face
-;;         font-lock-constant-face
-;;         font-lock-string-face
-;;         font-lock-warning-face))
-;;             (custom-theme-set-faces
-;;             'dark-minimal `(,face ((t (:foreground ,fg :weight normal :slant normal))))))
-
-;;     (dolist (face '(
-;;         font-lock-comment-face
-;;         font-lock-comment-delimiter-face
-;;         font-lock-doc-face
-;;         ))
-;;         (custom-theme-set-faces
-;;                'dark-minimal
-;;                `(,face ((t (:foreground ,green :slant normal))))))
-
-;;     (dolist (face '(
-;;         whitespace-space
-;;         whitespace-tab
-;;         whitespace-newline
-;;         whitespace-trailing
-;;         whitespace-empty
-;;         whitespace-line
-;;         whitespace-indentation
-;;         whitespace-space-before-tab
-;;         whitespace-space-after-tab
-;;         ))
-;;         (custom-theme-set-faces
-;;                'dark-minimal
-;;                `(,face ((t (:foreground "#3C3C3C" :background ,bg
-;;                             :weight normal :slant normal
-;;                             :underline nil :inverse-video nil)))))))
-
-;; ;; (enable-theme 'dark-minimal)
-;; end   of onncera's custom dark minimal theme - uncomment this entire block (including this comment)
-
 
 
 (add-to-list 'warning-suppress-types '(files missing-lexbind-cookie))  ;; specifically for pinerose theme - remove in future
@@ -329,22 +251,14 @@ $ TABS & INDENTS & SPACES & WHITESPACES & ETC
 
 (setq python-indent-guess-indent-offset nil)
 
-(add-hook 'prog-mode-hook (lambda ()
-        (setq-local indent-tabs-mode t)
-        (setq-local tab-width 4)
-        (add-hook  'before-save-hook #'onncera-smart-tabs nil t)
-    )
-)
-
 (setq-default tab-always-indent 'complete) (setq-default indent-tabs-mode t)
 (setq-default tab-width 4)
 (setq-default standard-indent 4)
-
 #+end_src
 
 $ GIT & VC & MAGIT & ETC
 #+begin_src emacs-lisp
-(use-package git-gutter :ensure t :hook (prog-mode . git-gutter-mode))
+(use-package git-gutter :ensure t)
 (use-package magit      :ensure t :defer t)
 #+end_src
 
@@ -374,25 +288,8 @@ $ assorted - TODO - change to a nicer name - move packages to their own blocks
 (use-package avy :ensure t :defer t)
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; @subtopic move-text
-;; TODO - may be can defer
-(use-package move-text
-    :ensure t
-    :config
-    ;; Function advice to have Emacs re-indent the text in-and-around a text move
-    (defun onncera-move-text-indent-region-advice (&rest _ignored)
-        (let ((deactivate deactivate-mark))
-            (if (region-active-p)
-                (indent-region (region-beginning) (region-end))
-                (indent-region (line-beginning-position) (line-end-position)))
-            (setq deactivate-mark deactivate)))
-    (advice-add 'move-text-up   :after #'onncera-move-text-indent-region-advice)
-    (advice-add 'move-text-down :after #'onncera-move-text-indent-region-advice)
-)
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 ;; @subtopic corfu
-(use-package corfu :ensure t :hook (prog-mode . corfu-mode)
+(use-package corfu :ensure t
     :config
     (keymap-unset corfu-map "<tab>") (keymap-unset corfu-map "TAB")
     (setq corfu-quit-no-match t) (setq corfu-quit-at-boundary t)
@@ -403,7 +300,7 @@ $ assorted - TODO - change to a nicer name - move packages to their own blocks
 ;; @subtopic cape
 (use-package cape :ensure t :demand t
     :config
-    (defun onncera/cape-prog-setup ()
+    (defun onncera-cape-prog-setup ()
         (add-hook 'completion-at-point-functions #'cape-file 80 t)
         (add-hook 'completion-at-point-functions  (cape-capf-sort
                   (cape-capf-super
@@ -414,12 +311,8 @@ $ assorted - TODO - change to a nicer name - move packages to their own blocks
           90 t
         )
     )
-    (add-hook 'prog-mode-hook #'onncera/cape-prog-setup)
+    (add-hook 'prog-mode-hook #'onncera-cape-prog-setup)
 )
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; @subtopic whitespace handling
-(add-hook 'before-save-hook #'delete-trailing-whitespace)
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic shell-pop
@@ -439,7 +332,7 @@ $ assorted - TODO - change to a nicer name - move packages to their own blocks
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; @subtopic indent-bars
-(use-package indent-bars :ensure t :hook (prog-mode . indent-bars-mode)
+(use-package indent-bars :ensure t
     :config
     (setq indent-bars-color '(highlight :face-bg t :blend 0.15))
     (setq indent-bars-pattern ".")
@@ -473,7 +366,8 @@ $ IMENU
 $ MULTIPLE CURSORS
 #+begin_src emacs-lisp
 (use-package multiple-cursors :ensure t :defer t
-    :init (setq mc/list-file "~/.emacs.d/onemacs-cache/mc-lists.el"))
+    :config (setq mc/always-run-for-all t)  ;; stop annoying me with "y" confirmations
+    :init   (setq mc/list-file "~/.emacs.d/onemacs-cache/mc-lists.el"))
 #+end_src
 
 $ UNDO & REDO
@@ -502,8 +396,18 @@ $ UNDO & REDO
 
 ! HOOKS
 #+begin_src emacs-lisp
-(add-hook 'prog-mode-hook 'onncera-highlight-todo)
-(add-hook 'prog-mode-hook 'whitespace-mode)
+
+(add-hook 'before-save-hook #'delete-trailing-whitespace)
+(add-hook 'prog-mode-hook
+    (lambda ()
+        (git-gutter-mode 1) (corfu-mode 1)
+        (whitespace-mode 1) (indent-bars-mode 1)
+        (setq-local tab-width 4)
+        (setq-local indent-tabs-mode t)
+        (add-hook  'before-save-hook #'onncera-smart-tabs nil t)
+    )
+)
+
 #+end_src
 
 ! KEYBINDINGS
@@ -595,10 +499,10 @@ $ unbind etc
 #+begin_src emacs-lisp
 (pcase-dolist (`(,key . ,cmd)
                   '(
-                       ("<prior>"      . move-text-up)              ;; 'page up'
-                       ("<next>"       . move-text-down)            ;; 'page down'
-                       ("<home>"       . er/expand-region)          ;; 'home'
-                       ("<end>"        . er/contract-region)        ;; 'end'
+                       ("<prior>"      . previous-buffer)           ;; 'page up'
+                       ("<next>"       . next-buffer)               ;; 'page down'
+                       ("<home>"       . move-text-up)              ;; 'home'
+                       ("<end>"        . move-text-down)            ;; 'end'
                        ("<help>"       . git-gutter:previous-hunk)  ;; 'insert'
                        ("<deletechar>" . git-gutter:next-hunk)      ;; 'delete'
 
@@ -670,9 +574,4 @@ $ unbind etc
     )
     )
 
-#+end_src
-
-- this line has to be ran the last
-#+begin_src emacs-lisp
-(set-face-attribute 'italic nil :slant 'normal)
 #+end_src
