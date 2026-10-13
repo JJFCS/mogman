@@ -167,42 +167,25 @@ $ function 5
 $ function 6
 #+begin_src emacs-lisp
 
-(defun onncera-smart-tabs () "convert leading groups of 4 spaces to tabs & subsequent tabs to spaces"
+(defun onncera-switch-theme () "switch themes and disable italics and restore fonts"
     (interactive)
-    (let ((tab-width 4))
-        (save-excursion
-        (save-restriction
-            (widen)
-            (goto-char (point-min))
-            (while (< (point) (point-max))
-                (let* ((beg (point))
-                       (end (progn
-                            (skip-chars-forward " \t" (line-end-position))
-                            (point)))
-                       (prefix (buffer-substring-no-properties beg end))
-                       (state  (save-excursion
-                               (save-match-data
-                                   (syntax-ppss beg)))))
-                    (unless (or (eolp) (nth 3 state))
-                       (let ((replacement
-                             (replace-regexp-in-string
-                            " \\{4\\}" "\t" prefix t t)))
-                       (unless (equal prefix replacement)
-                           (delete-region beg end)
-                           (insert replacement)))
-                       ;; everything after the leading indentation uses spaces
-                       (untabify (point) (line-end-position))))
-                (forward-line 1))))))
+    (let ((theme (intern (completing-read "Load theme: " (custom-available-themes)))))
+        (mapc #'disable-theme custom-enabled-themes)
+        (load-theme     theme t) (onncera-disable-italics)
+        (set-face-attribute 'default        nil :family "JetBrainsMonoNL Nerd Font" :height 140 :width 'condensed :weight 'regular)
+        (set-face-attribute 'fixed-pitch    nil :family "JetBrainsMonoNL Nerd Font" :height 140 :width 'condensed :weight 'regular)
+        (set-face-attribute 'variable-pitch nil :family "Merriweather" :height 140)
+    )
+)
 
 #+end_src
 
 ! THEMES & FONTS & APPEARANCES
 #+begin_src emacs-lisp
 
-;; (use-package pixel-themes :vc (:url "https://github.com/lucasobx/pixel-themes"))
-;; (mapc #'disable-theme custom-enabled-themes)
-;; (load-theme 'pixel-themes-alia16 t)
-;; (onncera-disable-italics)
+(use-package sculpture-themes        :vc (:url "https://github.com/precompute/sculpture-themes"))
+(use-package hyperstitional-themes   :vc (:url "https://github.com/precompute/hyperstitional-themes"))
+(use-package pixel-themes            :vc (:url "https://github.com/lucasobx/pixel-themes"))
 
 
 (add-to-list 'warning-suppress-types '(files missing-lexbind-cookie))  ;; specifically for pinerose theme - remove in future
@@ -251,7 +234,7 @@ $ TABS & INDENTS & SPACES & WHITESPACES & ETC
 
 (setq python-indent-guess-indent-offset nil)
 
-(setq-default tab-always-indent 'complete) (setq-default indent-tabs-mode t)
+(setq-default tab-always-indent 'complete) (setq-default indent-tabs-mode nil)
 (setq-default tab-width 4)
 (setq-default standard-indent 4)
 #+end_src
@@ -397,14 +380,18 @@ $ UNDO & REDO
 ! HOOKS
 #+begin_src emacs-lisp
 
-(add-hook 'before-save-hook #'delete-trailing-whitespace)
+(defun onncera-whitespace-cleanup () "cleaning up whitespace when save"
+    (delete-trailing-whitespace)
+    (untabify (point-min) (point-max))
+)
+
+(add-hook 'before-save-hook #'onncera-whitespace-cleanup)
 (add-hook 'prog-mode-hook
     (lambda ()
         (git-gutter-mode 1) (corfu-mode 1)
         (whitespace-mode 1) (indent-bars-mode 1)
         (setq-local tab-width 4)
-        (setq-local indent-tabs-mode t)
-        (add-hook  'before-save-hook #'onncera-smart-tabs nil t)
+        (setq-local indent-tabs-mode nil)
     )
 )
 
@@ -429,6 +416,7 @@ $ onncera-a-map (done by AI) - check!
 
 (defvar onncera-a-map (make-sparse-keymap) "onncera C-c a prefix")
 (global-set-key (kbd "C-c a") onncera-a-map)
+(define-key onncera-a-map (kbd "c") #'onncera-switch-theme)
 (define-key onncera-a-map (kbd "i") #'imenu)
 (define-key onncera-a-map (kbd "t") #'onncera-create-ansi-term)
 
