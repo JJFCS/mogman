@@ -183,6 +183,8 @@ $ function 6
 ! THEMES & FONTS & APPEARANCES
 #+begin_src emacs-lisp
 
+(setq custom-safe-themes t)
+
 (use-package sculpture-themes        :vc (:url "https://github.com/precompute/sculpture-themes"))
 (use-package hyperstitional-themes   :vc (:url "https://github.com/precompute/hyperstitional-themes"))
 (use-package pixel-themes            :vc (:url "https://github.com/lucasobx/pixel-themes"))
