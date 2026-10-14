@@ -126,13 +126,6 @@ $ function 2
 
 $ function 3
 #+begin_src emacs-lisp
-(defun onncera-insert-double-dagger () (interactive) (insert "‡"))
-(defun onncera-insert-plus-minus-sign () (interactive) (insert "±"))
-(defun onncera-insert-currency-sign () (interactive) (insert "¤"))
-#+end_src
-
-$ function 4
-#+begin_src emacs-lisp
 
 (defun onncera-mark-word-forward  () "extend the region forward  by one word"
     (interactive) (unless (region-active-p) (set-mark (point))) (forward-word  1) (activate-mark))
@@ -149,7 +142,7 @@ $ function 4
 
 #+end_src
 
-$ function 5
+$ function 4
 #+begin_src emacs-lisp
 
 (defun onncera-disable-italics ()
@@ -164,7 +157,7 @@ $ function 5
 
 #+end_src
 
-$ function 6
+$ function 5
 #+begin_src emacs-lisp
 
 (defun onncera-switch-theme () "switch themes and disable italics and restore fonts"
@@ -183,16 +176,10 @@ $ function 6
 ! THEMES & FONTS & APPEARANCES
 #+begin_src emacs-lisp
 
-(setq custom-safe-themes t)
-
-(use-package sculpture-themes        :vc (:url "https://github.com/precompute/sculpture-themes"))
-(use-package hyperstitional-themes   :vc (:url "https://github.com/precompute/hyperstitional-themes"))
-(use-package pixel-themes            :vc (:url "https://github.com/lucasobx/pixel-themes"))
-
-
-(add-to-list 'warning-suppress-types '(files missing-lexbind-cookie))  ;; specifically for pinerose theme - remove in future
-(use-package autothemer :ensure t)  ;; dependency
-(use-package pinerose-emacs :vc (:url "https://github.com/konrad1977/pinerose-emacs")
+(add-to-list 'warning-suppress-types '(files missing-lexbind-cookie))  ;; SPECIFICALLY FOR PINEROSE THEME
+(use-package  autothemer :ensure t)  ;; dependency
+(use-package  pixel-themes   :vc (:url "https://github.com/lucasobx/pixel-themes"))
+(use-package  pinerose-emacs :vc (:url "https://github.com/konrad1977/pinerose-emacs")
     :no-require t)
 
 (mapc #'disable-theme custom-enabled-themes)
@@ -225,10 +212,8 @@ $ TABS & INDENTS & SPACES & WHITESPACES & ETC
 #+begin_src emacs-lisp
 (setq whitespace-style
     '(face indentation newline tabs tab-mark trailing
-        spaces
         space-before-tab
         space-after-tab
-        space-mark
     )
 )
 
@@ -236,7 +221,7 @@ $ TABS & INDENTS & SPACES & WHITESPACES & ETC
 
 (setq python-indent-guess-indent-offset nil)
 
-(setq-default tab-always-indent 'complete) (setq-default indent-tabs-mode nil)
+(setq-default tab-always-indent 'complete) (setq-default indent-tabs-mode t)
 (setq-default tab-width 4)
 (setq-default standard-indent 4)
 #+end_src
@@ -316,30 +301,6 @@ $ assorted - TODO - change to a nicer name - move packages to their own blocks
     (setq   shell-pop-autocd-to-working-dir nil))
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; @subtopic indent-bars
-(use-package indent-bars :ensure t
-    :config
-    (setq indent-bars-color '(highlight :face-bg t :blend 0.15))
-    (setq indent-bars-pattern ".")
-    (setq indent-bars-color-by-depth '(:regexp "outline-\\([0-9]+\\)" :blend 1))
-    (setq indent-bars-highlight-current-depth '(:blend 0.5))
-    (setq indent-bars-display-on-blank-lines t)
-)
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-#+end_src
-
-$ ORG
-#+begin_src emacs-lisp
-(setq org-startup-with-inline-images t)
-(setq org-fontify-quote-and-verse-blocks t)  ;; force org to use org-quote face to text inside quote blocks
-
-(font-lock-add-keywords 'org-mode '(
-    ("¤\\([^¤]+\\)¤" (1 '(:background "blue"          :foreground "white") prepend))
-    ("‡\\([^‡]+\\)‡" (1 '(:background "deep pink"     :foreground "white") prepend))
-    ("±\\([^±]+\\)±" (1 '(:background "DarkGoldenrod" :foreground "white") prepend))
-        )
-    )
 #+end_src
 
 $ IMENU
@@ -351,8 +312,11 @@ $ IMENU
 $ MULTIPLE CURSORS
 #+begin_src emacs-lisp
 (use-package multiple-cursors :ensure t :defer t
-    :config (setq mc/always-run-for-all t)  ;; stop annoying me with "y" confirmations
-    :init   (setq mc/list-file "~/.emacs.d/onemacs-cache/mc-lists.el"))
+    :init
+    (setq mc/always-run-for-all t)  ;; stop annoying me with "y" confirmations
+    (setq mc/list-file "~/.emacs.d/onemacs-cache/mc-lists.el")
+)
+
 #+end_src
 
 $ UNDO & REDO
@@ -384,7 +348,7 @@ $ UNDO & REDO
 
 (defun onncera-whitespace-cleanup () "cleaning up whitespace when save"
     (delete-trailing-whitespace)
-    (untabify (point-min) (point-max))
+    (tabify (point-min) (point-max))
 )
 
 (add-hook 'before-save-hook #'onncera-whitespace-cleanup)
@@ -393,7 +357,7 @@ $ UNDO & REDO
         (git-gutter-mode 1) (corfu-mode 1)
         (whitespace-mode 1) (indent-bars-mode 1)
         (setq-local tab-width 4)
-        (setq-local indent-tabs-mode nil)
+        (setq-local indent-tabs-mode t)
     )
 )
 
@@ -421,12 +385,6 @@ $ onncera-a-map (done by AI) - check!
 (define-key onncera-a-map (kbd "c") #'onncera-switch-theme)
 (define-key onncera-a-map (kbd "i") #'imenu)
 (define-key onncera-a-map (kbd "t") #'onncera-create-ansi-term)
-
-(defvar onncera-u-map (make-sparse-keymap) "onncera C-c u prefix")     ;; unicode
-(global-set-key (kbd "C-c u") onncera-u-map)
-(define-key onncera-u-map (kbd "b") #'onncera-insert-currency-sign)    ;; blue highlights
-(define-key onncera-u-map (kbd "p") #'onncera-insert-double-dagger)    ;; pink highlights
-(define-key onncera-u-map (kbd "y") #'onncera-insert-plus-minus-sign)  ;; yellow highlights
 
 (global-set-key (kbd "M-o") 'other-window)
 
