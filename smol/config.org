@@ -212,8 +212,10 @@ $ TABS & INDENTS & SPACES & WHITESPACES & ETC
 #+begin_src emacs-lisp
 (setq whitespace-style
     '(face indentation newline tabs tab-mark trailing
+        spaces
         space-before-tab
         space-after-tab
+        space-mark
     )
 )
 
@@ -221,7 +223,7 @@ $ TABS & INDENTS & SPACES & WHITESPACES & ETC
 
 (setq python-indent-guess-indent-offset nil)
 
-(setq-default tab-always-indent 'complete) (setq-default indent-tabs-mode t)
+(setq-default tab-always-indent 'complete) (setq-default indent-tabs-mode nil)
 (setq-default tab-width 4)
 (setq-default standard-indent 4)
 #+end_src
@@ -348,7 +350,7 @@ $ UNDO & REDO
 
 (defun onncera-whitespace-cleanup () "cleaning up whitespace when save"
     (delete-trailing-whitespace)
-    (tabify (point-min) (point-max))
+    (untabify (point-min) (point-max))
 )
 
 (add-hook 'before-save-hook #'onncera-whitespace-cleanup)
@@ -357,7 +359,7 @@ $ UNDO & REDO
         (git-gutter-mode 1) (corfu-mode 1)
         (whitespace-mode 1) (indent-bars-mode 1)
         (setq-local tab-width 4)
-        (setq-local indent-tabs-mode t)
+        (setq-local indent-tabs-mode nil)
     )
 )
 
