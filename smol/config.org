@@ -303,6 +303,29 @@ $ assorted - TODO - change to a nicer name - move packages to their own blocks
     (setq   shell-pop-autocd-to-working-dir nil))
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; @subtopic solidity mode
+(use-package solidity-mode :ensure t)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; TODO - play around with speedbar-get-focus and setup keybindings - use sublime text super + k , super + b
+;; @subtopic speedbar - https://www.youtube.com/watch?v=Crn6x3RmmyQ&t=1s
+(use-package speedbar
+    :config
+    (setq speedbar-prefer-window t) (setq speedbar-use-images nil) (setq speedbar-show-unknown-files t)
+)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; @subtopic indent-bars
+(use-package indent-bars
+    :ensure t
+    :commands indent-bars-mode
+    :hook (
+        (python-ts-mode . indent-bars-mode) (python-mode . indent-bars-mode)
+    )
+    :config (setq indent-bars-prefer-character t)
+)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 #+end_src
 
 $ IMENU
